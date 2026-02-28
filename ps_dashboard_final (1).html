@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CS Tracker Pro</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700;900&family=Rajdhani:wght@500;600;700&display=swap');
+:root{--bg:#080d18;--sf:#0f1825;--sf2:#162030;--br:#1c3550;--ac:#1558a0;--ac2:#3b9eff;--gold:#f0a500;--red:#e53e3e;--or:#ed8936;--gr:#38a169;--tx:#e8edf5;--dim:#5a7399;--crit:#ff2020;--pur:#805ad5;--teal:#0bc5b8;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--tx);font-family:'Noto Sans Devanagari',sans-serif;min-height:100vh;}
+
+/* ── LICENSE SCREEN ── */
+.lic-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0d1f3c,#080d18 70%);}
+.lic-box{background:#0f1825;border:1px solid #1c3550;border-radius:16px;padding:32px;width:460px;max-width:95vw;text-align:center;}
+.lic-logo{font-size:48px;margin-bottom:10px;}
+.lic-title{font-family:'Rajdhani',sans-serif;font-size:22px;font-weight:700;color:#f0a500;margin-bottom:4px;}
+.lic-sub{font-size:12px;color:#5a7399;margin-bottom:20px;}
+.lic-devid{background:#162030;border:1px solid #1c3550;border-radius:8px;padding:12px;margin-bottom:16px;}
+.lic-devlbl{font-size:10px;color:#5a7399;margin-bottom:4px;}
+.lic-devval{font-family:monospace;font-size:16px;font-weight:700;color:#3b9eff;letter-spacing:2px;}
+.lic-copy{background:rgba(59,158,255,0.1);border:1px solid rgba(59,158,255,0.2);color:#90cdf4;padding:4px 12px;border-radius:5px;font-size:11px;cursor:pointer;margin-top:6px;}
+.lic-inp-lbl{font-size:11px;color:#5a7399;text-align:left;margin-bottom:4px;display:block;}
+.lic-inp{width:100%;background:#162030;border:1px solid #1c3550;color:#e0e8f5;padding:10px 13px;border-radius:8px;font-size:16px;font-family:monospace;letter-spacing:2px;outline:none;text-align:center;text-transform:uppercase;}
+.lic-inp:focus{border-color:#3b9eff;}
+.lic-btn{width:100%;background:linear-gradient(135deg,#1558a0,#3b9eff);border:none;color:#fff;padding:12px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:14px;font-family:'Noto Sans Devanagari',sans-serif;}
+.lic-err{color:#fc8181;font-size:12px;margin-top:8px;display:none;}
+.lic-info{font-size:11px;color:#5a7399;margin-top:14px;line-height:1.8;background:rgba(59,158,255,0.05);border:1px solid rgba(59,158,255,0.1);border-radius:6px;padding:10px;}
+.lic-exp-box{background:#0f1825;border:2px solid #e53e3e;border-radius:16px;padding:32px;width:460px;max-width:95vw;text-align:center;}
+.lic-exp-icon{font-size:56px;margin-bottom:10px;}
+.lic-exp-title{font-family:'Rajdhani',sans-serif;font-size:24px;font-weight:700;color:#e53e3e;margin-bottom:8px;}
+.lic-exp-msg{font-size:13px;color:#5a7399;line-height:1.8;margin-bottom:16px;}
+.lic-exp-dev{background:#162030;border:1px solid #e53e3e;border-radius:8px;padding:12px;margin-bottom:16px;}
+.lic-trial-badge{display:inline-block;background:rgba(59,158,255,0.15);border:1px solid rgba(59,158,255,0.3);color:#90cdf4;padding:4px 14px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:14px;}
+.lic-active-badge{display:inline-block;background:rgba(56,161,105,0.15);border:1px solid rgba(56,161,105,0.3);color:#68d391;padding:4px 14px;border-radius:10px;font-size:12px;font-weight:700;margin-bottom:14px;}
+
+/* ── SETUP ── */
+.setup{min-height:100vh;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse at center,#0d1f3c,var(--bg) 70%);}
+.setup-box{background:var(--sf);border:1px solid var(--br);border-radius:16px;padding:32px;width:500px;max-width:95vw;}
+.s-title{font-family:'Rajdhani',sans-serif;font-size:20px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:3px;}
+.s-sub{font-size:12px;color:var(--dim);text-align:center;margin-bottom:20px;}
+.s-lbl{display:block;font-size:11px;color:var(--dim);margin:10px 0 4px;}
+.s-inp{width:100%;background:var(--sf2);border:1px solid var(--br);color:var(--tx);padding:9px 12px;border-radius:7px;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none;}
+.s-inp:focus{border-color:var(--ac2);}
+.s-btn{width:100%;background:linear-gradient(135deg,var(--ac),var(--ac2));border:none;color:#fff;padding:11px;border-radius:8px;font-family:'Noto Sans Devanagari',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:18px;}
+.s-err{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+.s-info{margin-top:12px;font-size:11px;color:var(--dim);background:rgba(59,158,255,0.06);border:1px solid rgba(59,158,255,0.12);border-radius:6px;padding:9px;line-height:1.8;}
+.s-badge{display:inline-block;background:rgba(56,161,105,0.15);border:1px solid rgba(56,161,105,0.3);color:var(--gr);padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;margin:0 auto 14px;display:block;text-align:center;width:fit-content;margin:0 auto 14px;}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,#06101e,#0d1f3c,#06101e);border-bottom:2px solid var(--ac);padding:0 18px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:200;}
+.h-left{display:flex;align-items:center;gap:11px;}
+.emblem{width:40px;height:40px;background:linear-gradient(135deg,var(--gold),#c47d00);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.h1{font-family:'Rajdhani',sans-serif;font-size:16px;font-weight:700;color:var(--gold);}
+.h2{font-size:12px;color:var(--ac2);font-weight:600;}
+.h3{font-size:10px;color:var(--dim);}
+.role-badge{background:rgba(56,161,105,0.15);border:1px solid rgba(56,161,105,0.3);color:var(--gr);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;}
+.sync-bar{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--dim);}
+.sd.on{background:var(--gr);animation:sp 2s infinite;}
+.sd.sy{background:var(--gold);animation:sp 0.5s infinite;}
+.sd.er{background:var(--red);}
+@keyframes sp{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.clock{font-family:'Rajdhani',sans-serif;font-size:17px;color:var(--ac2);font-weight:700;}
+.dt{font-size:10px;color:var(--dim);}
+.cfg-btn{background:rgba(255,255,255,0.05);border:1px solid var(--br);color:var(--dim);padding:5px 11px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'Noto Sans Devanagari',sans-serif;}
+
+/* ── TABS ── */
+.tabs{background:var(--sf);border-bottom:1px solid var(--br);padding:0 18px;display:flex;gap:2px;overflow-x:auto;position:sticky;top:64px;z-index:100;}
+.tb{background:none;border:none;padding:9px 14px;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;color:var(--dim);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;}
+.tb.on{color:var(--ac2);border-bottom-color:var(--ac2);}
+.tbg{color:#fff;font-size:10px;padding:1px 5px;border-radius:8px;margin-left:4px;font-family:'Rajdhani',sans-serif;font-weight:700;background:var(--red);}
+.tbg.pulse{animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.2;}}
+
+/* ── PANELS ── */
+.panel{display:none;padding:15px 18px;max-width:1500px;margin:0 auto;}
+.panel.on{display:block;}
+
+/* ── STATS ── */
+.srow{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:13px;}
+.sc{background:var(--sf);border:1px solid var(--br);border-radius:10px;padding:10px 14px;text-align:center;min-width:105px;}
+.sv{font-family:'Rajdhani',sans-serif;font-size:25px;font-weight:700;line-height:1;}
+.sl{font-size:10px;color:var(--dim);margin-top:3px;}
+.sv.r{color:var(--red)}.sv.o{color:var(--or)}.sv.g{color:var(--gr)}.sv.b{color:var(--ac2)}.sv.gold{color:var(--gold)}.sv.p{color:var(--pur)}
+
+/* ── CTRL ── */
+.ctrl{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:8px;}
+.cright{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.btn{background:var(--ac);border:none;color:#fff;padding:7px 13px;border-radius:6px;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;}
+.btn.g{background:#276749;}.btn.g:hover{background:#2f855a;}
+.btn.pr{background:#553c9a;}
+.btn.gr{background:var(--sf2);border:1px solid var(--br);color:var(--dim);}
+.btn.rd{background:#742a2a;}
+.srch{background:var(--sf2);border:1px solid var(--br);color:var(--tx);padding:7px 10px;border-radius:6px;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;width:170px;outline:none;}
+.srch:focus{border-color:var(--ac2);}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto;border-radius:8px;border:1px solid var(--br);}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead tr{background:var(--sf2);border-bottom:2px solid var(--br);}
+th{padding:8px 10px;text-align:left;font-weight:600;color:var(--dim);font-size:10px;letter-spacing:0.4px;white-space:nowrap;}
+tbody tr{border-bottom:1px solid rgba(28,53,80,0.4);transition:background 0.15s;}
+tbody tr:hover{background:var(--sf2);}
+td{padding:8px 10px;vertical-align:middle;}
+.gc{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;}
+.dc{font-family:'Rajdhani',sans-serif;font-size:13px;font-weight:700;}
+.dc.safe{color:var(--gr)}.dc.caution{color:var(--gold)}.dc.warning{color:var(--or);animation:fw 1.5s infinite;}
+.dc.critical,.dc.overdue{color:var(--crit);animation:fc 0.8s infinite;}
+@keyframes fw{0%,100%{opacity:1;}50%{opacity:0.4;}}
+@keyframes fc{0%,100%{opacity:1;}50%{opacity:0.1;}}
+.rc{background:rgba(229,62,62,0.05)!important;}
+.rw{background:rgba(237,137,54,0.04)!important;}
+.rf{background:rgba(128,90,213,0.04)!important;}
+.sbg{font-size:10px;padding:2px 7px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-weight:700;}
+.sbg.safe{background:rgba(56,161,105,0.12);color:var(--gr);}
+.sbg.caution{background:rgba(240,165,0,0.12);color:var(--gold);}
+.sbg.warning{background:rgba(237,137,54,0.12);color:var(--or);}
+.sbg.critical,.sbg.overdue{background:rgba(229,62,62,0.15);color:var(--crit);}
+.sbg.filed{background:rgba(128,90,213,0.15);color:var(--pur);}
+.ct{font-size:10px;padding:2px 6px;border-radius:4px;font-family:'Rajdhani',sans-serif;font-weight:600;}
+.ct.c60{background:rgba(240,165,0,0.12);color:var(--gold);}
+.ct.c90{background:rgba(21,88,160,0.2);color:var(--ac2);}
+.ab{background:none;border:none;padding:4px 5px;cursor:pointer;font-size:14px;border-radius:4px;}
+.ab:hover{background:rgba(255,255,255,0.07);}
+.pb-w{height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:4px;width:72px;}
+.pb{height:100%;border-radius:2px;}
+.empty{text-align:center;padding:32px;color:var(--dim);font-size:13px;}
+
+/* ACP remark cell */
+.acp-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(11,197,184,0.1);border:1px solid rgba(11,197,184,0.25);color:var(--teal);font-size:10px;padding:2px 7px;border-radius:6px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dcp-pill{display:inline-flex;align-items:center;gap:4px;background:rgba(128,90,213,0.1);border:1px solid rgba(128,90,213,0.25);color:var(--pur);font-size:10px;padding:2px 7px;border-radius:6px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ── MODAL ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.78);display:none;align-items:center;justify-content:center;z-index:999;padding:10px;}
+.mo.on{display:flex;}
+.modal{background:var(--sf);border:1px solid var(--br);border-radius:12px;padding:22px;width:530px;max-width:100%;max-height:90vh;overflow-y:auto;}
+.mt{font-size:15px;font-weight:700;color:var(--ac2);margin-bottom:15px;display:flex;justify-content:space-between;align-items:center;}
+.mc{background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;}
+.fg{margin-bottom:12px;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fl{display:block;font-size:11px;color:var(--dim);margin-bottom:4px;}
+.fi{width:100%;background:var(--sf2);border:1px solid var(--br);color:var(--tx);padding:8px 11px;border-radius:6px;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none;}
+.fi:focus{border-color:var(--ac2);}
+.fs{width:100%;background:var(--sf2);border:1px solid var(--br);color:var(--tx);padding:8px 11px;border-radius:6px;font-family:'Noto Sans Devanagari',sans-serif;font-size:13px;outline:none;}
+.mf{display:flex;justify-content:flex-end;gap:8px;margin-top:15px;}
+.bcl{background:var(--sf2);border:1px solid var(--br);color:var(--dim);padding:7px 14px;border-radius:6px;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;cursor:pointer;}
+.info-b{background:rgba(59,158,255,0.06);border:1px solid rgba(59,158,255,0.15);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--dim);}
+.ov-b{background:rgba(255,32,32,0.07);border:1px solid var(--crit);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--dim);}
+.ov-b strong{color:var(--crit);}
+.fi-b{background:rgba(128,90,213,0.07);border:1px solid var(--pur);border-radius:7px;padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--dim);}
+.fi-b strong{color:var(--pur);}
+
+/* LOADING */
+.load{position:fixed;inset:0;background:rgba(8,13,24,0.88);display:none;align-items:center;justify-content:center;z-index:500;flex-direction:column;gap:12px;}
+.spin{width:36px;height:36px;border:3px solid var(--br);border-top-color:var(--ac2);border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.lt{font-size:13px;color:var(--dim);}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--br);border-radius:3px;}
+/* ── LOCK SYSTEM ── */
+.lock-bar{position:fixed;top:64px;left:0;right:0;z-index:300;background:linear-gradient(135deg,#7b1c1c,#c0392b);color:#fff;padding:10px 18px;display:none;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px solid #e74c3c;box-shadow:0 4px 20px rgba(0,0,0,.5);}
+.lock-bar.show{display:flex;}
+.lock-msg{display:flex;align-items:center;gap:10px;}
+.lock-icon{font-size:22px;animation:lp .8s infinite;}
+@keyframes lp{0%,100%{opacity:1;}50%{opacity:.3;}}
+.lock-info{font-size:13px;font-weight:700;}.lock-who{font-size:11px;color:rgba(255,255,255,.8);margin-top:2px;}
+.lock-take{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 14px;border-radius:6px;font-family:'Noto Sans Devanagari',sans-serif;font-size:12px;cursor:pointer;font-weight:700;}
+.lock-take:hover{background:rgba(255,255,255,.28);}
+.edit-ind{position:fixed;bottom:18px;right:18px;z-index:250;background:rgba(56,161,105,.92);color:#fff;padding:7px 15px;border-radius:20px;font-size:11px;font-weight:700;display:none;align-items:center;gap:7px;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.edit-ind.show{display:flex;}
+.edit-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:sp .8s infinite;}
+</style>
+</head>
+<body>
+
+<!-- LICENSE SCREEN -->
+<div id="licenseScreen" class="lic-wrap" style="display:none;">
+  <!-- EXPIRED -->
+  <div class="lic-exp-box" id="licExpired" style="display:none;">
+    <div class="lic-exp-icon">🔒</div>
+    <div class="lic-exp-title">License Expired</div>
+    <div class="lic-exp-msg">
+      तुमच्या License ची मुदत संपली आहे.<br>
+      नवीन Key साठी खालील Device ID पाठवा:
+    </div>
+    <div class="lic-exp-dev">
+      <div class="lic-devlbl">तुमचा Device ID</div>
+      <div class="lic-devval" id="expDevId">—</div>
+      <button class="lic-copy" onclick="copyDeviceId('expDevId')">📋 Copy करा</button>
+    </div>
+    <div style="font-size:12px;color:#5a7399;">📞 संपर्क करा — नवीन Key मिळाल्यावर खाली टाका:</div>
+    <br>
+    <label class="lic-inp-lbl">नवीन License Key</label>
+    <input class="lic-inp" id="renewKey" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" oninput="formatKeyInput(this)">
+    <div class="lic-err" id="renewErr"></div>
+    <button class="lic-btn" onclick="activateLicense()">🔑 Activate करा</button>
+  </div>
+
+  <!-- BLOCKED -->
+  <div class="lic-exp-box" id="licBlocked" style="display:none;border-color:#ed8936;">
+    <div class="lic-exp-icon">⛔</div>
+    <div class="lic-exp-title" style="color:#ed8936;">Access Blocked</div>
+    <div class="lic-exp-msg">हे device block केले गेले आहे.<br>अधिक माहितीसाठी संपर्क करा.</div>
+    <div class="lic-exp-dev" style="border-color:#ed8936;">
+      <div class="lic-devlbl">Device ID</div>
+      <div class="lic-devval" id="blockDevId">—</div>
+    </div>
+  </div>
+
+  <!-- NEW LICENSE -->
+  <div class="lic-box" id="licNew">
+    <div class="lic-logo">🏛</div>
+    <div class="lic-title">CS Tracker Pro</div>
+    <div class="lic-sub">पोलीस स्टेशन | CS मुदत व्यवस्थापन प्रणाली</div>
+
+    <div class="lic-devid">
+      <div class="lic-devlbl">तुमचा Device ID (हा नंबर पाठवा)</div>
+      <div class="lic-devval" id="newDevId">—</div>
+      <button class="lic-copy" onclick="copyDeviceId('newDevId')">📋 Copy करा</button>
+    </div>
+
+    <label class="lic-inp-lbl">License Key *</label>
+    <input class="lic-inp" id="licKey" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" oninput="formatKeyInput(this)">
+    <div class="lic-err" id="licErr"></div>
+    <button class="lic-btn" onclick="activateLicense()">🔑 License Activate करा</button>
+
+    <div class="lic-info">
+      ℹ️ <strong>पहिल्यांदा?</strong> वरील Device ID copy करा आणि पाठवा.<br>
+      तुम्हाला 30 दिवसांची मोफत Trial Key मिळेल.<br>
+      Key मिळाल्यावर वर टाका → Dashboard सुरू होईल.
+    </div>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div id="setupScreen" class="setup">
+  <div class="setup-box">
+    <div style="text-align:center;font-size:40px;margin-bottom:10px;">🏛</div>
+    <div class="s-badge">पोलीस स्टेशन</div>
+    <div class="s-title">CS Tracker Pro</div>
+    <div class="s-sub">पोलीस स्टेशन | गुन्हे व CS मुदत व्यवस्थापन</div>
+
+    <label class="s-lbl">Firebase Project ID *</label>
+    <input class="s-inp" id="sProjectId" placeholder="your-project-id">
+    <label class="s-lbl">Firebase API Key *</label>
+    <input class="s-inp" id="sApiKey" placeholder="AIzaSy...">
+    <label class="s-lbl">ACP Division ID * (ACP कार्यालयाकडून मिळवा)</label>
+    <input class="s-inp" id="sAcpId" placeholder="उदा. nagpur_acp_1">
+    <label class="s-lbl">पोलीस स्टेशन ID * (spaces नाहीत, एकदाच ठरवा)</label>
+    <input class="s-inp" id="sPsId" placeholder="उदा. sion_ps"
+      oninput="normPsId(this)" style="font-family:monospace;letter-spacing:1px;">
+    <div id="psIdPreview" style="display:none;font-size:11px;margin-top:3px;color:var(--dim);">
+      📌 ID तयार होईल: <strong id="psIdFinal" style="color:var(--ac2);font-family:monospace;"></strong>
+    </div>
+    <div id="psIdWarn" style="display:none;background:rgba(240,165,0,.12);border:1px solid var(--gold);border-radius:7px;padding:10px 12px;margin-top:6px;">
+      <div style="font-weight:700;color:var(--gold);font-size:13px;">⚠️ हे पोलीस स्टेशन आधीच नोंदवलेले आहे!</div>
+      <div id="psIdWarnDetail" style="font-size:12px;color:var(--tx);margin-top:4px;line-height:1.6;"></div>
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <button class="s-btn" style="background:var(--gr);padding:7px 14px;font-size:12px;" onclick="doConnectForce()">✅ हेच माझे Station आहे — उघडा</button>
+        <button class="s-btn" style="background:var(--dim);padding:7px 14px;font-size:12px;" onclick="document.getElementById('psIdWarn').style.display='none'">रद्द करा</button>
+      </div>
+    </div>
+    <label class="s-lbl">पोलीस स्टेशनचे नाव *</label>
+    <input class="s-inp" id="sPsName" placeholder="उदा. कोतवाली पोलीस स्टेशन">
+    <label class="s-lbl">SHO / Sr.PI चे नाव</label>
+    <input class="s-inp" id="sSho" placeholder="उदा. पो.नि. रमेश पाटील">
+    <div class="s-info">ℹ️ Project ID व API Key IT Cell कडून मिळवा. एकदा भरल्यावर browser मध्ये save होतात.</div>
+    <div class="s-err" id="sErr"></div>
+    <button class="s-btn" onclick="doConnect()">🔗 Dashboard उघडा</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="app" style="display:none;">
+
+<!-- LOCK BAR -->
+<div class="lock-bar" id="lockBar">
+  <div class="lock-msg">
+    <span class="lock-icon">🔒</span>
+    <div>
+      <div class="lock-info" id="lockInfo">दुसरा user editing करत आहे...</div>
+      <div class="lock-who" id="lockWho">--</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:11px;color:rgba(255,255,255,.7);">तुम्ही फक्त पाहू शकता — editing बंद आहे</span>
+    <button class="lock-take" onclick="takeLock()">🔓 माझ्याकडे घ्या</button>
+  </div>
+</div>
+
+<!-- EDITING INDICATOR (स्वतःसाठी) -->
+<div class="edit-ind" id="editInd">
+  <div class="edit-dot"></div>
+  <span id="editIndTxt">तुम्ही editing करत आहात</span>
+</div>
+
+<div class="hdr">
+  <div class="h-left">
+    <div class="emblem">🏛</div>
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span class="h1" id="hPS">--</span>
+        <span class="role-badge">PS</span>
+      </div>
+      <div class="h2" id="hSHO"></div>
+      <div class="h3">CS मुदत व्यवस्थापन प्रणाली</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="sync-bar"><div class="sd" id="sd"></div><span id="ss">--</span></div>
+    <div style="text-align:right;">
+      <div class="clock" id="clk">--:--:--</div>
+      <div class="dt" id="dt">--</div>
+    </div>
+    <button class="cfg-btn" onclick="openCfg()">⚙</button>
+    <button class="cfg-btn" id="relLockBtn" onclick="releaseLock()" style="display:none;border-color:var(--gr);color:var(--gr);">🔓 Lock सोडा</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tb on" data-tab="all" onclick="switchTab('all')">
+    📋 सर्व प्रकरणे <span class="tbg pulse" id="urgAllBadge" style="display:none">0</span>
+  </button>
+  <button class="tb" data-tab="active60" onclick="switchTab('active60')">
+    🕐 60 दिवस <span class="tbg pulse" id="urg60Badge" style="display:none">0</span>
+  </button>
+  <button class="tb" data-tab="active90" onclick="switchTab('active90')">
+    🕐 90 दिवस <span class="tbg pulse" id="urg90Badge" style="display:none">0</span>
+  </button>
+  <button class="tb" data-tab="filed" onclick="switchTab('filed')">
+    ✅ दाखल झालेली <span class="tbg" id="filBadge" style="display:none;background:var(--pur)">0</span>
+  </button>
+</div>
+
+<!-- ALL CASES — एकत्रित -->
+<div class="panel on" id="panel-all">
+  <div class="srow" id="activeStatsAll"></div>
+  <div class="ctrl">
+    <div style="font-size:13px;font-weight:700;color:var(--ac2);" id="psTitle">📍 --</div>
+    <div class="cright">
+      <div style="display:flex;gap:4px;background:var(--sf2);border:1px solid var(--br);border-radius:7px;padding:3px;">
+        <button id="csBtn60_90" class="btn" style="background:var(--ac);padding:5px 11px;font-size:12px;" onclick="setCsFilter('all')">60+90</button>
+        <button id="csBtn60" class="btn gr" style="padding:5px 11px;font-size:12px;" onclick="setCsFilter(60)">60</button>
+        <button id="csBtn90" class="btn gr" style="padding:5px 11px;font-size:12px;" onclick="setCsFilter(90)">90</button>
+      </div>
+      <select class="srch" id="allOfficerFilter" onchange="renderActiveAll()" style="min-width:150px;">
+        <option value="">सर्व अधिकारी</option>
+      </select>
+      <input class="srch" id="allSearchQ" placeholder="गु.र.क्र. / कलम..." oninput="renderActiveAll()">
+      <button class="btn g" onclick="openAdd()">+ नवीन प्रकरण</button>
+      <button class="btn gr" onclick="doPrintFiltered()">🖨 प्रिंट</button>
+      <button class="btn" style="background:#276749;" onclick="doExcel()">📊 Excel</button>
+    </div>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th><th>C/S</th>
+        <th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस शिल्लक</th><th>स्थिती</th>
+        <th>प्रलंबित कारण</th><th>क्रिया</th>
+      </tr></thead>
+      <tbody id="activeTbAll"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ACTIVE 60 -->
+<div class="panel" id="panel-active60">
+  <div class="srow" id="activeStats60"></div>
+  <div class="ctrl">
+    <div style="font-size:13px;font-weight:700;color:var(--gold);">🕐 60 दिवस प्रकरणे</div>
+    <div class="cright">
+      <input class="srch" placeholder="गु.र.क्र. / अधिकारी..." oninput="filt('activeTb60',this.value)">
+      <button class="btn g" onclick="openAdd(60)">+ नवीन प्रकरण (60)</button>
+      <button class="btn gr" onclick="doPrint(60)">🖨 60 दिवस प्रिंट</button>
+    </div>
+  </div>
+  <div style="background:rgba(240,165,0,.07);border:1px solid rgba(240,165,0,.2);border-radius:7px;padding:7px 13px;margin-bottom:11px;font-size:11px;color:var(--gold);">
+    🕐 <strong>60 दिवस</strong> — शिक्षा ७ वर्षांपेक्षा कमी असलेले गुन्हे
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th>
+        <th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस शिल्लक</th><th>स्थिती</th>
+        <th>प्रलंबित कारण</th><th>ACP निर्देश</th><th>क्रिया</th>
+      </tr></thead>
+      <tbody id="activeTb60"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ACTIVE 90 -->
+<div class="panel" id="panel-active90">
+  <div class="srow" id="activeStats90"></div>
+  <div class="ctrl">
+    <div style="font-size:13px;font-weight:700;color:var(--ac2);">🕐 90 दिवस प्रकरणे</div>
+    <div class="cright">
+      <input class="srch" placeholder="गु.र.क्र. / अधिकारी..." oninput="filt('activeTb90',this.value)">
+      <button class="btn g" onclick="openAdd(90)">+ नवीन प्रकरण (90)</button>
+      <button class="btn gr" onclick="doPrint(90)">🖨 90 दिवस प्रिंट</button>
+    </div>
+  </div>
+  <div style="background:rgba(59,158,255,.07);border:1px solid rgba(59,158,255,.2);border-radius:7px;padding:7px 13px;margin-bottom:11px;font-size:11px;color:var(--ac2);">
+    🕐 <strong>90 दिवस</strong> — शिक्षा ७ वर्षे व अधिक असलेले गुन्हे
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th>
+        <th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस शिल्लक</th><th>स्थिती</th>
+        <th>प्रलंबित कारण</th><th>ACP निर्देश</th><th>क्रिया</th>
+      </tr></thead>
+      <tbody id="activeTb90"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FILED -->
+<div class="panel" id="panel-filed">
+  <div class="ctrl">
+    <div style="font-size:13px;font-weight:700;color:var(--pur);">✅ दाखल / अंतिम अहवाल झालेले गुन्हे</div>
+    <input class="srch" placeholder="शोधा..." oninput="filt('filedTb',this.value)">
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th><th>C/S</th>
+        <th>तपासी अधिकारी</th><th>दाखल प्रकार</th><th>CS दाखल तारीख</th><th>न्यायालय/शेरा</th><th>क्रिया</th>
+      </tr></thead>
+      <tbody id="filedTb"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- REMARKS -->
+<div class="panel" id="panel-remarks">
+  <div style="background:rgba(11,197,184,0.07);border:1px solid rgba(11,197,184,0.2);border-radius:8px;padding:10px 14px;margin-bottom:13px;font-size:12px;color:var(--teal);">
+    📌 ACP / DCP कार्यालयाने दिलेले निर्देश — या प्रकरणांवर त्वरित कार्यवाही करणे आवश्यक आहे.
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दिवस शिल्लक</th><th>स्थिती</th>
+        <th>ACP निर्देश</th><th>ACP दिनांक</th>
+      </tr></thead>
+      <tbody id="remTb"></tbody>
+    </table>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- ADD/EDIT MODAL -->
+<div class="mo" id="caseModal">
+  <div class="modal">
+    <div class="mt"><span id="caseTitle">नवीन प्रकरण नोंद</span><button class="mc" onclick="closeCase()">✕</button></div>
+    <form onsubmit="saveCase(event)">
+      <div class="fr">
+        <div class="fg"><label class="fl">गु.र.क्र. *</label>
+          <input class="fi" id="fGrno" required placeholder="125/2025"
+            oninput="chkGrno(this)"
+            style="text-transform:uppercase;">
+          <div id="grnoErr" style="display:none;color:var(--red);font-size:11px;margin-top:4px;padding:5px 8px;background:rgba(229,62,62,.08);border-radius:5px;border:1px solid rgba(229,62,62,.3);"></div>
+          <div id="grnoOk" style="display:none;color:var(--gr);font-size:11px;margin-top:4px;">✅ गु.र.क्र. उपलब्ध आहे</div>
+        </div>
+        <div class="fg"><label class="fl">C/S प्रकार *</label>
+          <select class="fs" id="fCS" onchange="updDl()">
+            <option value="60">60 दिवस (७ वर्षांपेक्षा कमी)</option>
+            <option value="90">90 दिवस (७ वर्षे व अधिक)</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">कलम *</label><input class="fi" id="fSec" required placeholder="103 BNSS, 307 IPC"></div>
+      <div class="fr">
+        <div class="fg"><label class="fl">दाखल दिनांक *</label><input type="date" class="fi" id="fDt" required onchange="updDl()"></div>
+        <div class="fg"><label class="fl">अंतिम मुदत</label><input class="fi" id="fDl" readonly style="color:var(--gold);"></div>
+      </div>
+      <div class="fg"><label class="fl">तपासी अधिकारी *</label>
+        <div style="display:flex;gap:8px;">
+          <select class="fs" id="fRank" style="width:105px;flex-shrink:0;">
+            <option value="ACP">ACP</option>
+            <option value="Sr.PI">Sr.PI</option>
+            <option value="PI">PI</option>
+            <option value="API">API</option>
+            <option value="PSI" selected>PSI</option>
+            <option value="ASI">ASI</option>
+            <option value="HC">HC</option>
+            <option value="PN">PN</option>
+            <option value="PC">PC</option>
+          </select>
+          <input class="fi" id="fOff" required placeholder="अधिकाऱ्याचे नाव" style="flex:1;">
+        </div>
+      </div>
+      <div class="fg"><label class="fl">शेरा</label><input class="fi" id="fRem" placeholder="पर्यायी"></div>
+      <input type="hidden" id="fIdx">
+      <div class="mf">
+        <button type="button" class="bcl" onclick="closeCase()">रद्द करा</button>
+        <button type="submit" class="btn g">✔ जतन करा</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- FILED MODAL -->
+<div class="mo" id="filedModal">
+  <div class="modal">
+    <div class="mt"><span>✅ CS / अंतिम अहवाल दाखल</span><button class="mc" onclick="closeFiled()">✕</button></div>
+    <div class="fi-b"><strong>प्रकरण : <span id="fmGrno"></span></strong><br>कलम : <span id="fmSec"></span> | अधिकारी : <span id="fmOff"></span></div>
+    <div class="fg"><label class="fl">दाखल प्रकार *</label>
+      <select class="fs" id="fmType">
+        <option value="दोषारोपपत्र">दोषारोपपत्र (Chargesheet)</option>
+        <option value="अंतिम अहवाल">अंतिम अहवाल (Final Report)</option>
+        <option value="पूरक दोषारोपपत्र">पूरक दोषारोपपत्र (Supplementary CS)</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">दाखल तारीख *</label><input type="date" class="fi" id="fmDate"></div>
+    <div class="fg"><label class="fl">न्यायालय / शेरा</label><input class="fi" id="fmCourt" placeholder="न्यायालय क्र. ३"></div>
+    <input type="hidden" id="fmIdx">
+    <div class="mf">
+      <button class="bcl" onclick="closeFiled()">रद्द करा</button>
+      <button class="btn pr" onclick="saveFiled()">✔ दाखल नोंद करा</button>
+    </div>
+  </div>
+</div>
+
+<!-- PENDING MODAL -->
+<div class="mo" id="pendModal">
+  <div class="modal">
+    <div class="mt"><span>📌 प्रलंबित कारण नोंद</span><button class="mc" onclick="closePend()">✕</button></div>
+    <div class="ov-b"><strong>⛔ प्रकरण : <span id="pmGrno"></span></strong><br><span id="pmDays"></span></div>
+    <div class="fg"><label class="fl">कारण प्रकार *</label>
+      <select class="fs" id="pmCat">
+        <option value="">— निवडा —</option>
+        <option value="FSL अहवाल प्रलंबित">FSL अहवाल प्रलंबित</option>
+        <option value="साक्षीदार उपलब्ध नाही">साक्षीदार उपलब्ध नाही</option>
+        <option value="आरोपी फरार">आरोपी फरार</option>
+        <option value="न्यायालयाकडून विस्तार मंजूर">न्यायालयाकडून विस्तार मंजूर</option>
+        <option value="वैद्यकीय अहवाल प्रलंबित">वैद्यकीय अहवाल प्रलंबित</option>
+        <option value="संगणकीय / बँक रेकॉर्ड प्रलंबित">संगणकीय / बँक रेकॉर्ड प्रलंबित</option>
+        <option value="न्यायालयीन कार्यवाही सुरू">न्यायालयीन कार्यवाही सुरू</option>
+        <option value="इतर">इतर</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">सविस्तर कारण</label><textarea class="fi" id="pmDet" rows="3" style="resize:vertical;"></textarea></div>
+    <input type="hidden" id="pmIdx">
+    <div class="mf">
+      <button class="bcl" onclick="closePend()">रद्द करा</button>
+      <button class="btn rd" onclick="clearPend()">🗑 हटवा</button>
+      <button class="btn g" onclick="savePend()">✔ जतन करा</button>
+    </div>
+  </div>
+</div>
+
+<!-- REOPEN MODAL -->
+<div class="mo" id="reopenModal">
+  <div class="modal" style="max-width:350px;">
+    <div class="mt" style="color:var(--or);"><span>↩ पुन्हा सक्रिय</span><button class="mc" onclick="closeReopen()">✕</button></div>
+    <div style="font-size:13px;color:var(--dim);margin-bottom:14px;">प्रकरण <strong id="ropGrno" style="color:var(--tx);"></strong> पुन्हा सक्रिय करायचे?</div>
+    <input type="hidden" id="ropIdx">
+    <div class="mf">
+      <button class="bcl" onclick="closeReopen()">नाही</button>
+      <button class="btn" style="background:#7b341e;" onclick="confirmReopen()">↩ सक्रिय करा</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="mo" id="cfgModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="mt"><span>⚙ सेटिंग्स</span><button class="mc" onclick="closeCfg()">✕</button></div>
+    <div class="fg"><label class="fl">स्टेशनचे नाव</label><input class="fi" id="cfgPS"></div>
+    <div class="fg"><label class="fl">SHO / Sr.PI चे नाव</label><input class="fi" id="cfgSHO"></div>
+    <div class="mf">
+      <button class="bcl" onclick="closeCfg()">रद्द करा</button>
+      <button class="btn rd" onclick="resetApp()" style="margin-right:auto;">🔄 Reset</button>
+      <button class="btn g" onclick="saveSettings()">✔ जतन करा</button>
+    </div>
+  </div>
+</div>
+
+<div class="load" id="loader"><div class="spin"></div><div class="lt" id="lt">लोड होत आहे...</div></div>
+
+<script>
+// ══════════ CONFIG ══════════
+const CK='ps_cfg_v2', DK='ps_data_v2';
+let CFG=null, db=null, S={cases:[]};
+
+function lCfg(){ try{return JSON.parse(localStorage.getItem(CK)||'null');}catch(e){return null;} }
+function sCfg(c){ try{localStorage.setItem(CK,JSON.stringify(c));}catch(e){} }
+function lData(){ try{const d=localStorage.getItem(DK);if(d)S=JSON.parse(d);}catch(e){} }
+function sData(){ try{localStorage.setItem(DK,JSON.stringify(S));}catch(e){} }
+
+// ══════════ CONNECT ══════════
+// PS ID — auto normalize + preview
+function normPsId(inp){
+  const raw=inp.value;
+  const normalized=raw.toLowerCase().replace(/\s+/g,'_').replace(/[^a-z0-9_]/g,'');
+  const prev=document.getElementById('psIdPreview');
+  const fin=document.getElementById('psIdFinal');
+  document.getElementById('psIdWarn').style.display='none';
+  if(normalized){
+    prev.style.display='block';
+    fin.textContent=normalized;
+  } else {
+    prev.style.display='none';
+  }
+}
+
+async function doConnect(){
+  const pid=v('sProjectId'),ak=v('sApiKey'),aid=v('sAcpId'),
+        psid=v('sPsId').replace(/\s+/g,'_').toLowerCase().replace(/[^a-z0-9_]/g,''),
+        psn=v('sPsName'),sho=v('sSho');
+  if(!pid||!ak||!aid||!psid||!psn){alert('सर्व अनिवार्य (*) माहिती भरा.');return;}
+
+  showLoad('Firebase शी जोडत आहे...');
+  try{
+    if(firebase.apps.length) await firebase.app().delete();
+    firebase.initializeApp({apiKey:ak,authDomain:`${pid}.firebaseapp.com`,projectId:pid});
+    db=firebase.firestore();
+
+    // PS नोंदवतो (आधीच असेल तर merge — data सुरक्षित)
+    await db.collection('acp_divisions').doc(aid).collection('ps_stations').doc(psid)
+      .set({_ping:true,psName:psn,shoName:sho||'',psId:psid},{merge:true});
+    CFG={pid,ak,aid,psid,psn,sho:sho||''};
+    sCfg(CFG);
+    hideLoad();
+    launch();
+
+  }catch(err){
+    hideLoad();
+    const el=document.getElementById('sErr');
+    el.style.display='block';el.textContent='❌ '+err.message;
+  }
+}
+
+// User ने confirm केले — हेच माझे Station आहे
+async function doConnectForce(){
+  const cfg=window._pendingCFG;
+  if(!cfg) return;
+  showLoad('जोडत आहे...');
+  try{
+    await db.collection('acp_divisions').doc(cfg.aid).collection('ps_stations').doc(cfg.psid)
+      .set({_ping:true,psName:cfg.psn,shoName:cfg.sho,psId:cfg.psid},{merge:true});
+    CFG=cfg;
+    sCfg(CFG);
+    hideLoad();
+    launch();
+  }catch(err){
+    hideLoad();
+    const el=document.getElementById('sErr');
+    el.style.display='block';el.textContent='❌ '+err.message;
+  }
+}
+
+function launch(){
+  document.getElementById('setupScreen').style.display='none';
+  document.getElementById('licenseScreen').style.display='none';
+  document.getElementById('app').style.display='block';
+  document.getElementById('hPS').textContent=CFG.psn;
+  document.getElementById('hSHO').textContent=CFG.sho?`👮 ${CFG.sho}`:'';
+  document.getElementById('psTitle').textContent=`📍 ${CFG.psn} — एकत्रित (60+90)`;
+  document.getElementById('cfgPS').value=CFG.psn;
+  document.getElementById('cfgSHO').value=CFG.sho||'';
+
+  // License badge in header
+  if(window._licDaysLeft !== undefined){
+    const daysLeft = window._licDaysLeft;
+    const type = window._licType;
+    const existingBadge = document.getElementById('licBadge');
+    if(!existingBadge){
+      const badge = document.createElement('span');
+      badge.id = 'licBadge';
+      badge.style.cssText = `font-size:10px;padding:2px 8px;border-radius:8px;font-family:'Rajdhani',sans-serif;font-weight:700;margin-left:8px;`;
+      if(type==='trial'){
+        badge.style.background='rgba(59,158,255,0.15)';badge.style.border='1px solid rgba(59,158,255,0.3)';badge.style.color='#90cdf4';
+        badge.textContent=`🔵 Trial — ${daysLeft} दिवस`;
+      } else {
+        badge.style.background='rgba(56,161,105,0.15)';badge.style.border='1px solid rgba(56,161,105,0.3)';badge.style.color='#68d391';
+        badge.textContent=`✅ Licensed — ${daysLeft} दिवस`;
+      }
+      document.getElementById('hPS').after(badge);
+    }
+
+    // Warn if expiring soon
+    if(daysLeft <= 7 && daysLeft > 0){
+      setTimeout(()=>alert(`⚠️ License ${daysLeft} दिवसांत संपणार आहे!\nनवीन Subscription साठी संपर्क करा.`), 2000);
+    }
+  }
+
+  tick(); setInterval(tick,1000);
+  lData();
+  listenCloud();
+  startLockListener();
+  renderAll();
+}
+
+// ══════════ LOCK SYSTEM ══════════
+// प्रत्येक browser session साठी unique ID
+const SESSION_ID = Math.random().toString(36).slice(2,10);
+const SESSION_NAME = () => CFG.sho ? CFG.sho : CFG.psn;
+let lockHolder = null;      // { sid, name, ts }
+let amILocked = false;      // मी lock घेतला आहे का
+let lockInterval = null;
+let lockListener = null;
+
+const LOCK_TTL = 30000; // 30 seconds — इतका वेळ inactive राहिल्यास lock सुटतो
+
+function lockRef(){ return db.collection('acp_divisions').doc(CFG.aid).collection('ps_stations').doc(CFG.psid); }
+
+// Lock घ्या
+async function acquireLock(){
+  const now = Date.now();
+  try{
+    await lockRef().update({
+      _lockSid: SESSION_ID,
+      _lockName: SESSION_NAME(),
+      _lockTs: now
+    });
+    amILocked = true;
+    startLockHeartbeat();
+    showEditIndicator(true);
+  }catch(e){ console.warn('Lock acquire failed',e); }
+}
+
+// Lock सोडा
+async function releaseLock(){
+  if(!amILocked) return;
+  try{
+    await lockRef().update({ _lockSid: '', _lockName: '', _lockTs: 0 });
+    amILocked = false;
+    stopLockHeartbeat();
+    showEditIndicator(false);
+  }catch(e){}
+}
+
+// Heartbeat — दर 15 sec timestamp update करतो (lock जिवंत ठेवतो)
+function startLockHeartbeat(){
+  stopLockHeartbeat();
+  lockInterval = setInterval(async ()=>{
+    if(amILocked){
+      try{ await lockRef().update({ _lockTs: Date.now() }); }catch(e){}
+    }
+  }, 15000);
+}
+function stopLockHeartbeat(){ if(lockInterval){ clearInterval(lockInterval); lockInterval=null; } }
+
+// Force घ्या (takeover)
+async function takeLock(){
+  if(!confirm('दुसऱ्याचे editing बंद करून तुम्हाला control घ्यायचे आहे का?')) return;
+  await acquireLock();
+  showLockBar(false);
+  showEditIndicator(true);
+  enableEditing(true);
+}
+
+// Lock bar दाखवा/लपवा
+function showLockBar(show, holder){
+  const bar = document.getElementById('lockBar');
+  if(show && holder){
+    document.getElementById('lockInfo').textContent = `🔒 ${holder.name} editing करत आहेत — तुम्ही फक्त पाहू शकता`;
+    document.getElementById('lockWho').textContent = `Session: ${holder.sid} | ${new Date(holder.ts).toLocaleTimeString('en-IN')}`;
+    bar.classList.add('show');
+    // tabs नीचे ढकलायला
+    document.querySelector('.tabs').style.top = '112px';
+  } else {
+    bar.classList.remove('show');
+    document.querySelector('.tabs').style.top = '64px';
+  }
+}
+
+// Editing indicator
+function showEditIndicator(show){
+  const el = document.getElementById('editInd');
+  const rb = document.getElementById('relLockBtn');
+  if(show){
+    document.getElementById('editIndTxt').textContent = `✏️ ${SESSION_NAME()} — editing सुरू`;
+    el.classList.add('show');
+    if(rb) rb.style.display='inline-block';
+  } else {
+    el.classList.remove('show');
+    if(rb) rb.style.display='none';
+  }
+}
+
+// Buttons enable/disable
+function enableEditing(on){
+  // Add/Edit बटणे disable करायची
+  document.querySelectorAll('.btn.g, .ab').forEach(b=>{
+    b.disabled = !on;
+    b.style.opacity = on ? '1' : '0.3';
+    b.style.pointerEvents = on ? 'auto' : 'none';
+  });
+}
+
+// Lock listener — Firebase वरून real-time watch
+function startLockListener(){
+  if(lockListener) lockListener();
+  lockListener = lockRef().onSnapshot(snap=>{
+    if(!snap.exists) return;
+    const d = snap.data();
+    const sid = d._lockSid || '';
+    const name = d._lockName || '';
+    const ts = d._lockTs || 0;
+    const now = Date.now();
+
+    // Lock expire झाला का? (30 sec)
+    if(sid && (now - ts) > LOCK_TTL){
+      // Stale lock — ignore करा
+      lockHolder = null;
+      if(!amILocked){ showLockBar(false); enableEditing(true); }
+      return;
+    }
+
+    if(!sid){
+      // Lock free आहे
+      lockHolder = null;
+      showLockBar(false);
+      if(!amILocked) enableEditing(true);
+    } else if(sid === SESSION_ID){
+      // माझा lock आहे
+      lockHolder = {sid, name, ts};
+      showLockBar(false);
+      showEditIndicator(true);
+      enableEditing(true);
+    } else {
+      // दुसऱ्याचा lock
+      lockHolder = {sid, name, ts};
+      if(amILocked){ amILocked=false; stopLockHeartbeat(); }
+      showLockBar(true, lockHolder);
+      showEditIndicator(false);
+      enableEditing(false);
+    }
+  });
+}
+
+// Page बंद करताना lock सोडा
+window.addEventListener('beforeunload', ()=>{ if(amILocked) releaseLock(); });
+// Visibility change — tab switch झाल्यावर
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden && amILocked){
+    // Tab लपवली — heartbeat थांबवतो (lock expire होऊ देतो)
+    stopLockHeartbeat();
+  } else if(!document.hidden && amILocked){
+    startLockHeartbeat();
+  }
+});
+
+
+function psRef(){ return db.collection('acp_divisions').doc(CFG.aid).collection('ps_stations').doc(CFG.psid); }
+
+function listenCloud(){
+  setSS('sy','जोडत आहे...');
+  psRef().onSnapshot(snap=>{
+    if(snap.exists){
+      const d=snap.data();
+      if(d.cases) S.cases=d.cases;
+      sData(); renderAll();
+      const t=new Date(); setSS('on',`Live ✓ ${p2(t.getHours())}:${p2(t.getMinutes())}`);
+    }
+  },err=>setSS('er','⚠️ Offline'));
+}
+
+async function pushCloud(){
+  if(!db||!CFG)return;
+  setSS('sy','sync...');
+  try{
+    await psRef().set({
+      psId:CFG.psid,psName:CFG.psn,shoName:CFG.sho||'',
+      cases:S.cases,
+      _lastSync:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    const t=new Date(); setSS('on',`☁️ ${p2(t.getHours())}:${p2(t.getMinutes())}`);
+  }catch(err){ setSS('er','⚠️ Sync error'); }
+}
+
+function save(){ sData(); pushCloud(); }
+
+function setSS(state,txt){
+  const d=document.getElementById('sd'),s=document.getElementById('ss');
+  d.className='sd'+(state==='on'?' on':state==='sy'?' sy':state==='er'?' er':'');
+  s.textContent=txt;
+}
+
+// ══════════ CLOCK ══════════
+function p2(n){return String(n).padStart(2,'0');}
+function tick(){
+  const n=new Date();
+  document.getElementById('clk').textContent=p2(n.getHours())+':'+p2(n.getMinutes())+':'+p2(n.getSeconds());
+  document.getElementById('dt').textContent=n.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+// ══════════ HELPERS ══════════
+function v(id){return document.getElementById(id).value.trim();}
+function dEl(ds){const n=new Date();n.setHours(0,0,0,0);const d=new Date(ds);d.setHours(0,0,0,0);return Math.floor((n-d)/86400000);}
+function dLeft(ds,lim){return lim-dEl(ds);}
+function dlStr(ds,lim){if(!ds)return'';const d=new Date(ds);d.setDate(d.getDate()+parseInt(lim));return d.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function fD(ds){if(!ds)return'—';return new Date(ds).toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function getSt(rem){
+  if(rem<0)return{c:'overdue',l:'मुदत संपली!'};
+  if(rem<=5)return{c:'critical',l:'अत्यंत तातडी'};
+  if(rem<=10)return{c:'warning',l:'इशारा'};
+  if(rem<=15)return{c:'caution',l:'सावध'};
+  return{c:'safe',l:'सुरक्षित'};
+}
+function pct(ds,lim){return Math.min(100,Math.round(dEl(ds)/lim*100));}
+
+// ══════════ TABS ══════════
+function switchTab(id){
+  document.querySelectorAll('.tb').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('on',p.id==='panel-'+id));
+}
+
+// ══════════ CS TYPE FILTER ══════════
+let csFilter = 'all';
+function setCsFilter(val){
+  csFilter = val;
+  document.getElementById('csBtn60_90').style.background = val==='all'?'var(--ac)':'';
+  document.getElementById('csBtn60_90').className = 'btn'+(val==='all'?'':' gr');
+  document.getElementById('csBtn60').style.background = val===60?'var(--gold)':'';
+  document.getElementById('csBtn60').className = 'btn'+(val===60?'':' gr');
+  document.getElementById('csBtn90').style.background = val===90?'var(--ac2)':'';
+  document.getElementById('csBtn90').className = 'btn'+(val===90?'':' gr');
+  renderActiveAll();
+}
+
+// ══════════ RENDER ══════════
+function renderAll(){ renderActiveAll(); renderActive60(); renderActive90(); renderFiled(); updBadges(); }
+
+function updBadges(){
+  const act=S.cases.filter(c=>!c.filed);
+  const urgAll=act.filter(c=>dLeft(c.date,c.csType)<=10).length;
+  const urg60=act.filter(c=>c.csType===60&&dLeft(c.date,c.csType)<=10).length;
+  const urg90=act.filter(c=>c.csType===90&&dLeft(c.date,c.csType)<=10).length;
+  const ba=document.getElementById('urgAllBadge'); ba.textContent=urgAll; ba.style.display=urgAll?'inline':'none';
+  const ab60=document.getElementById('urg60Badge'); ab60.textContent=urg60; ab60.style.display=urg60?'inline':'none';
+  const ab90=document.getElementById('urg90Badge'); ab90.textContent=urg90; ab90.style.display=urg90?'inline':'none';
+  const fil=S.cases.filter(c=>!!c.filed).length;
+  const fb=document.getElementById('filBadge'); fb.textContent=fil; fb.style.display=fil?'inline':'none';
+}
+
+function renderActiveAll(){
+  const offFilter=document.getElementById('allOfficerFilter')?.value||'';
+  const qFilter=(document.getElementById('allSearchQ')?.value||'').toLowerCase();
+
+  const all=S.cases.map((c,i)=>({...c,i})).filter(c=>!c.filed);
+
+  // Officer dropdown populate (unique names)
+  const sel=document.getElementById('allOfficerFilter');
+  if(sel){
+    const cur=sel.value;
+    const officers=[...new Set(all.map(c=>c.officer).filter(Boolean))].sort();
+    sel.innerHTML='<option value="">सर्व अधिकारी</option>'+officers.map(o=>`<option value="${o}"${o===cur?' selected':''}>${o}</option>`).join('');
+  }
+
+  // Filter apply
+  let act=all;
+  if(csFilter!=='all') act=act.filter(c=>c.csType===csFilter);
+  if(offFilter) act=act.filter(c=>c.officer===offFilter);
+  if(qFilter) act=act.filter(c=>(c.grno+' '+c.section+' '+c.officer).toLowerCase().includes(qFilter));
+  act=act.sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+
+  let ov=0,cr=0,wa=0,ca=0,sa=0,t60=0,t90=0;
+  act.forEach(c=>{
+    const s=getSt(dLeft(c.date,c.csType)).c;
+    if(s==='overdue')ov++;else if(s==='critical')cr++;else if(s==='warning')wa++;else if(s==='caution')ca++;else sa++;
+    if(c.csType===60)t60++;else t90++;
+  });
+  document.getElementById('activeStatsAll').innerHTML=`
+    <div class="sc"><div class="sv r">${ov}</div><div class="sl">मुदत संपली ⛔</div></div>
+    <div class="sc"><div class="sv r">${cr}</div><div class="sl">अत्यंत तातडी 🔴</div></div>
+    <div class="sc"><div class="sv o">${wa}</div><div class="sl">इशारा 🟠</div></div>
+    <div class="sc"><div class="sv gold">${ca}</div><div class="sl">सावध 🟡</div></div>
+    <div class="sc"><div class="sv g">${sa}</div><div class="sl">सुरक्षित 🟢</div></div>
+    ${csFilter==='all'?`<div class="sc"><div class="sv gold">${t60}</div><div class="sl">60 दिवस</div></div><div class="sc"><div class="sv b">${t90}</div><div class="sl">90 दिवस</div></div>`:''}
+    <div class="sc"><div class="sv b">${act.length}</div><div class="sl">एकूण सक्रिय</div></div>`;
+  const tb=document.getElementById('activeTbAll');
+  tb.innerHTML=act.length?act.map((c,n)=>{
+    const rem=dLeft(c.date,c.csType),st=getSt(rem);
+    const bc=st.c==='safe'?'var(--gr)':st.c==='caution'?'var(--gold)':st.c==='warning'?'var(--or)':'var(--crit)';
+    const rc=(st.c==='critical'||st.c==='overdue')?'rc':st.c==='warning'?'rw':'';
+    const rt=rem<0?`${Math.abs(rem)} दि. उलटले!`:`${rem} दिवस`;
+    const isOv=st.c==='overdue'||st.c==='critical';
+    const rH=isOv?(c.pendingReason?`<span style="color:var(--crit);font-size:11px;font-weight:600;">📌 ${c.pendingReason}</span>`:`<span style="color:var(--dim);font-size:11px;font-style:italic;">—</span>`):`<span style="color:var(--br);font-size:11px;">—</span>`;
+    return `<tr class="${rc}">
+      <td style="color:var(--dim);font-size:11px;">${n+1}</td>
+      <td class="gc">${c.grno}</td>
+      <td style="color:var(--ac2);font-size:11px;">${c.section}</td>
+      <td style="font-size:11px;">${fD(c.date)}</td>
+      <td><span class="ct c${c.csType}">${c.csType}</span></td>
+      <td style="font-size:12px;color:var(--dim);">${c.officer}</td>
+      <td style="font-size:11px;color:var(--gold);">${dlStr(c.date,c.csType)}</td>
+      <td><div class="dc ${st.c}">${rt}<div class="pb-w"><div class="pb" style="width:${pct(c.date,c.csType)}%;background:${bc};"></div></div></div></td>
+      <td><span class="sbg ${st.c}">${st.l}</span></td>
+      <td>${rH}</td>
+      <td style="white-space:nowrap;">
+        <button class="ab" onclick="openEdit(${c.i})" title="संपादित">✏️</button>
+        ${isOv?`<button class="ab" onclick="openPend(${c.i})" title="प्रलंबित कारण" style="color:var(--crit);">📌</button>`:''}
+        <button class="ab" onclick="openFiled(${c.i})" title="CS दाखल" style="color:var(--pur);">✅</button>
+        <button class="ab" onclick="delCase(${c.i})" title="हटवा" style="color:var(--dim);">🗑</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="11"><div class="empty">कोणतीही${offFilter?' '+offFilter+' यांची':''} सक्रिय प्रकरणे नाहीत</div></td></tr>`;
+}
+
+function renderActiveCS(csType){
+  const act=S.cases.map((c,i)=>({...c,i})).filter(c=>!c.filed&&c.csType===csType)
+    .sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+  let ov=0,cr=0,wa=0,ca=0,sa=0;
+  act.forEach(c=>{const s=getSt(dLeft(c.date,c.csType)).c;if(s==='overdue')ov++;else if(s==='critical')cr++;else if(s==='warning')wa++;else if(s==='caution')ca++;else sa++;});
+  const clr=csType===60?'var(--gold)':'var(--ac2)';
+  document.getElementById(`activeStats${csType}`).innerHTML=`
+    <div class="sc"><div class="sv r">${ov}</div><div class="sl">मुदत संपली ⛔</div></div>
+    <div class="sc"><div class="sv r">${cr}</div><div class="sl">अत्यंत तातडी 🔴</div></div>
+    <div class="sc"><div class="sv o">${wa}</div><div class="sl">इशारा 🟠</div></div>
+    <div class="sc"><div class="sv gold">${ca}</div><div class="sl">सावध 🟡</div></div>
+    <div class="sc"><div class="sv g">${sa}</div><div class="sl">सुरक्षित 🟢</div></div>
+    <div class="sc"><div class="sv b">${act.length}</div><div class="sl">एकूण ${csType} दि.</div></div>`;
+  const tb=document.getElementById(`activeTb${csType}`);
+  tb.innerHTML=act.length?act.map((c,n)=>{
+    const rem=dLeft(c.date,c.csType),st=getSt(rem);
+    const bc=st.c==='safe'?'var(--gr)':st.c==='caution'?'var(--gold)':st.c==='warning'?'var(--or)':'var(--crit)';
+    const rc=(st.c==='critical'||st.c==='overdue')?'rc':st.c==='warning'?'rw':'';
+    const rt=rem<0?`${Math.abs(rem)} दि. उलटले!`:`${rem} दिवस`;
+    const isOv=st.c==='overdue'||st.c==='critical';
+    const rH=isOv?(c.pendingReason?`<span style="color:var(--crit);font-size:11px;font-weight:600;">📌 ${c.pendingReason}</span>`:`<span style="color:var(--dim);font-size:11px;font-style:italic;">—</span>`):`<span style="color:var(--br);font-size:11px;">—</span>`;
+    const aH=c.acpRemark?`<span class="acp-pill" title="${c.acpRemark}">📌 ${c.acpRemark}</span>`:`<span style="color:var(--br);font-size:11px;">—</span>`;
+    return `<tr class="${rc}">
+      <td style="color:var(--dim);font-size:11px;">${n+1}</td>
+      <td class="gc">${c.grno}</td>
+      <td style="color:var(--ac2);font-size:11px;">${c.section}</td>
+      <td style="font-size:11px;">${fD(c.date)}</td>
+      <td style="font-size:12px;color:var(--dim);">${c.officer}</td>
+      <td style="font-size:11px;color:var(--gold);">${dlStr(c.date,c.csType)}</td>
+      <td><div class="dc ${st.c}">${rt}<div class="pb-w"><div class="pb" style="width:${pct(c.date,c.csType)}%;background:${bc};"></div></div></div></td>
+      <td><span class="sbg ${st.c}">${st.l}</span></td>
+      <td>${rH}</td>
+      <td>${aH}</td>
+      <td style="white-space:nowrap;">
+        <button class="ab" onclick="openEdit(${c.i})" title="संपादित">✏️</button>
+        ${isOv?`<button class="ab" onclick="openPend(${c.i})" title="प्रलंबित कारण" style="color:var(--crit);">📌</button>`:''}
+        <button class="ab" onclick="openFiled(${c.i})" title="CS दाखल" style="color:var(--pur);">✅</button>
+        <button class="ab" onclick="delCase(${c.i})" title="हटवा" style="color:var(--dim);">🗑</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="11"><div class="empty">कोणतीही ${csType} दिवसांची सक्रिय प्रकरणे नाहीत</div></td></tr>`;
+}
+function renderActive60(){ renderActiveCS(60); }
+function renderActive90(){ renderActiveCS(90); }
+
+function renderFiled(){
+  const fil=S.cases.map((c,i)=>({...c,i})).filter(c=>!!c.filed);
+  const tb=document.getElementById('filedTb');
+  tb.innerHTML=fil.length?fil.map((c,n)=>`<tr class="rf">
+    <td style="color:var(--dim);font-size:11px;">${n+1}</td>
+    <td class="gc">${c.grno}</td>
+    <td style="color:var(--ac2);font-size:11px;">${c.section}</td>
+    <td style="font-size:11px;">${fD(c.date)}</td>
+    <td><span class="ct c${c.csType}">${c.csType}</span></td>
+    <td style="font-size:12px;color:var(--dim);">${c.officer}</td>
+    <td><span class="sbg filed">${c.filed.type}</span></td>
+    <td style="font-size:11px;color:var(--pur);">${fD(c.filed.date)}</td>
+    <td style="font-size:11px;color:var(--dim);">${c.filed.remark||'—'}</td>
+    <td style="white-space:nowrap;">
+      <button class="ab" onclick="openReopen(${c.i})" title="पुन्हा सक्रिय">↩</button>
+      <button class="ab" onclick="delCase(${c.i})" style="color:var(--dim);" title="हटवा">🗑</button>
+    </td>
+  </tr>`).join(''):`<tr><td colspan="10"><div class="empty">कोणतेही दाखल प्रकरणे नाहीत</div></td></tr>`;
+}
+
+function renderRemarks(){
+  const rem=S.cases.map((c,i)=>({...c,i})).filter(c=>!c.filed&&c.acpRemark);
+  const tb=document.getElementById('remTb');
+  tb.innerHTML=rem.length?rem.map((c,n)=>{
+    const rem2=dLeft(c.date,c.csType),st=getSt(rem2);
+    const rt=rem2<0?`${Math.abs(rem2)} दि. उलटले`:`${rem2} दिवस`;
+    return `<tr class="${st.c==='overdue'||st.c==='critical'?'rc':st.c==='warning'?'rw':''}">
+      <td style="color:var(--dim);font-size:11px;">${n+1}</td>
+      <td class="gc">${c.grno}</td>
+      <td style="color:var(--ac2);font-size:11px;">${c.section}</td>
+      <td><div class="dc ${st.c}">${rt}</div></td>
+      <td><span class="sbg ${st.c}">${st.l}</span></td>
+      <td style="color:var(--teal);font-size:12px;font-weight:600;">📌 ${c.acpRemark}${c.acpRemarkBy?` <span style="color:var(--dim);font-size:10px;">(${c.acpRemarkBy})</span>`:''}</td>
+      <td style="font-size:11px;color:var(--dim);">${c.acpRemarkDate?fD(c.acpRemarkDate):'—'}</td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="7"><div class="empty">📭 कोणतेही निर्देश नाहीत</div></td></tr>`;
+}
+
+function filt(id,q){
+  const ql=q.toLowerCase();
+  document.querySelectorAll(`#${id} tr`).forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(ql)?'':'none';});
+}
+
+// ── GR Number real-time duplicate check ──
+function chkGrno(inp){
+  const grno=inp.value.toUpperCase().replace(/\s+/g,'');
+  const errEl=document.getElementById('grnoErr');
+  const okEl=document.getElementById('grnoOk');
+  inp.style.borderColor='';
+  errEl.style.display='none';
+  okEl.style.display='none';
+  if(!grno||grno.length<3) return;
+  const idx=document.getElementById('fIdx').value;
+  const isDup=S.cases.some((c,i)=>{
+    if(idx!==''&&parseInt(idx)===i) return false;
+    return c.grno.toUpperCase().replace(/\s+/g,'')===grno;
+  });
+  if(isDup){
+    const dupCase=S.cases.find(c=>c.grno.toUpperCase().replace(/\s+/g,'')===grno);
+    const dupStatus=dupCase.filed?'✅ दाखल झालेला':'🔴 सक्रिय';
+    errEl.textContent=`⚠️ हा गु.र.क्र. आधीच नोंदवलेला आहे — ${dupStatus}`;
+    errEl.style.display='block';
+    inp.style.borderColor='var(--red)';
+  } else {
+    okEl.style.display='block';
+    inp.style.borderColor='var(--gr)';
+  }
+}
+
+function clearGrnoCheck(){
+  const inp=document.getElementById('fGrno');
+  if(inp){ inp.style.borderColor=''; }
+  const e=document.getElementById('grnoErr'); if(e) e.style.display='none';
+  const o=document.getElementById('grnoOk'); if(o) o.style.display='none';
+}
+
+
+function updDl(){document.getElementById('fDl').value=dlStr(v('fDt'),document.getElementById('fCS').value);}
+function openAdd(csType){
+  if(!amILocked) acquireLock();
+  document.getElementById('caseTitle').textContent='नवीन प्रकरण नोंद';
+  ['fGrno','fSec','fOff','fRem'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fRank').value='PSI';
+  document.getElementById('fDt').value='';
+  document.getElementById('fCS').value=csType||60;
+  document.getElementById('fDl').value='';
+  document.getElementById('fIdx').value='';
+  clearGrnoCheck();
+  document.getElementById('caseModal').classList.add('on');
+}
+function openEdit(i){
+  if(!amILocked) acquireLock();
+  const c=S.cases[i];
+  document.getElementById('caseTitle').textContent='प्रकरण संपादित करा';
+  document.getElementById('fGrno').value=c.grno;
+  document.getElementById('fSec').value=c.section;
+  document.getElementById('fDt').value=c.date;
+  document.getElementById('fCS').value=c.csType;
+  const ranks=['ACP','Sr.PI','PI','API','PSI','ASI','HC','PN','PC'];
+  let storedRank='PSI', storedName=c.officer||'';
+  for(const r of ranks){ if(storedName.startsWith(r+' ')){storedRank=r; storedName=storedName.slice(r.length+1); break;} }
+  document.getElementById('fRank').value=storedRank;
+  document.getElementById('fOff').value=storedName;
+  document.getElementById('fRem').value=c.remark||'';
+  document.getElementById('fIdx').value=i;
+  clearGrnoCheck(); // edit mode मध्ये स्वतःचा GR ok आहे
+  updDl();
+  document.getElementById('caseModal').classList.add('on');
+}
+let lockReleaseTimer = null;
+function scheduleLockRelease(){
+  if(lockReleaseTimer) clearTimeout(lockReleaseTimer);
+  lockReleaseTimer = setTimeout(()=>{
+    if(amILocked) releaseLock();
+  }, 60000); // 60 sec निष्क्रिय राहिल्यास lock सुटतो
+}
+
+function closeCase(){
+  document.getElementById('caseModal').classList.remove('on');
+  scheduleLockRelease();
+}
+function saveCase(e){
+  e.preventDefault();
+  const idx=document.getElementById('fIdx').value;
+  const grno=v('fGrno').toUpperCase().replace(/\s+/g,'');
+
+  // ── Duplicate GR check ──
+  const isDup=S.cases.some((c,i)=>{
+    if(idx!=='' && parseInt(idx)===i) return false; // स्वतःला skip करा (edit mode)
+    return c.grno.toUpperCase().replace(/\s+/g,'')===grno;
+  });
+
+  if(isDup){
+    const dupCase=S.cases.find(c=>c.grno.toUpperCase().replace(/\s+/g,'')===grno);
+    const dupStatus=dupCase.filed?'(✅ दाखल झालेला)':'(🔴 सक्रिय)';
+    const errEl=document.getElementById('grnoErr');
+    errEl.style.display='block';
+    errEl.textContent=`⚠️ गु.र.क्र. ${grno} आधीच नोंदवलेला आहे ${dupStatus}`;
+    document.getElementById('fGrno').style.borderColor='var(--red)';
+    document.getElementById('fGrno').focus();
+    return;
+  }
+
+  const obj={
+    grno,section:v('fSec'),date:v('fDt'),
+    csType:parseInt(document.getElementById('fCS').value),
+    officer:document.getElementById('fRank').value+' '+v('fOff'),remark:v('fRem'),filed:false
+  };
+  if(idx!==''){
+    const old=S.cases[parseInt(idx)];
+    ['pendingReason','pendingDetail','acpRemark','acpRemarkDate','acpRemarkBy','filed'].forEach(k=>{if(old[k]!==undefined)obj[k]=old[k];});
+    S.cases[parseInt(idx)]=obj;
+  } else { S.cases.push(obj); }
+  closeCase(); save(); renderAll();
+}
+function delCase(i){if(!confirm(`गु.र.क्र. ${S.cases[i].grno} हटवायचे?`))return; S.cases.splice(i,1); save(); renderAll();}
+
+// ══════════ FILED MODAL ══════════
+function openFiled(i){
+  if(!amILocked) acquireLock();
+  const c=S.cases[i];
+  document.getElementById('fmGrno').textContent=c.grno;
+  document.getElementById('fmSec').textContent=c.section;
+  document.getElementById('fmOff').textContent=c.officer;
+  document.getElementById('fmDate').value=new Date().toISOString().split('T')[0];
+  document.getElementById('fmCourt').value='';
+  document.getElementById('fmIdx').value=i;
+  document.getElementById('filedModal').classList.add('on');
+}
+function closeFiled(){document.getElementById('filedModal').classList.remove('on'); scheduleLockRelease();}
+function saveFiled(){
+  const i=parseInt(v('fmIdx')),dt=v('fmDate');
+  if(!dt){alert('दाखल तारीख भरा');return;}
+  S.cases[i].filed={type:document.getElementById('fmType').value,date:dt,remark:v('fmCourt')};
+  closeFiled(); save(); renderAll();
+}
+
+// ══════════ PENDING MODAL ══════════
+function openPend(i){
+  if(!amILocked) acquireLock();
+  const c=S.cases[i],rem=dLeft(c.date,c.csType);
+  document.getElementById('pmGrno').textContent=c.grno;
+  document.getElementById('pmDays').textContent=rem<0?`⛔ मुदत ${Math.abs(rem)} दिवसांपूर्वी संपली`:`🔴 ${rem} दिवस शिल्लक`;
+  document.getElementById('pmCat').value=c.pendingReason||'';
+  document.getElementById('pmDet').value=c.pendingDetail||'';
+  document.getElementById('pmIdx').value=i;
+  document.getElementById('pendModal').classList.add('on');
+}
+function closePend(){document.getElementById('pendModal').classList.remove('on'); scheduleLockRelease();}
+function savePend(){
+  const i=parseInt(v('pmIdx')),cat=document.getElementById('pmCat').value;
+  if(!cat){alert('कारण निवडा');return;}
+  S.cases[i].pendingReason=cat; S.cases[i].pendingDetail=v('pmDet');
+  closePend(); save(); renderAll();
+}
+function clearPend(){
+  const i=parseInt(v('pmIdx'));
+  delete S.cases[i].pendingReason; delete S.cases[i].pendingDetail;
+  closePend(); save(); renderAll();
+}
+
+// ══════════ REOPEN ══════════
+function openReopen(i){document.getElementById('ropGrno').textContent=S.cases[i].grno;document.getElementById('ropIdx').value=i;document.getElementById('reopenModal').classList.add('on');}
+function closeReopen(){document.getElementById('reopenModal').classList.remove('on');}
+function confirmReopen(){const i=parseInt(v('ropIdx'));S.cases[i].filed=false;closeReopen();save();renderAll();}
+
+// ══════════ SETTINGS ══════════
+function openCfg(){document.getElementById('cfgModal').classList.add('on');}
+function closeCfg(){document.getElementById('cfgModal').classList.remove('on');}
+function saveSettings(){
+  CFG.psn=v('cfgPS')||CFG.psn; CFG.sho=v('cfgSHO');
+  sCfg(CFG);
+  document.getElementById('hPS').textContent=CFG.psn;
+  document.getElementById('hSHO').textContent=CFG.sho?`👮 ${CFG.sho}`:'';
+  document.getElementById('psTitle').textContent=`📍 ${CFG.psn} — एकत्रित (60+90)`;
+  pushCloud(); closeCfg();
+}
+function resetApp(){if(!confirm('Reset करायचे? Data जाणार नाही.'))return; localStorage.removeItem(CK); location.reload();}
+
+// ══════════ FILTER-AWARE PRINT ══════════
+function doPrintFiltered(){
+  const offFilter=document.getElementById('allOfficerFilter')?.value||'';
+  const qFilter=(document.getElementById('allSearchQ')?.value||'').toLowerCase();
+  let act=S.cases.map((c,i)=>({...c,i})).filter(c=>!c.filed);
+  if(csFilter!=='all') act=act.filter(c=>c.csType===csFilter);
+  if(offFilter) act=act.filter(c=>c.officer===offFilter);
+  if(qFilter) act=act.filter(c=>(c.grno+' '+c.section+' '+c.officer).toLowerCase().includes(qFilter));
+  act=act.sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+  const now=new Date();
+  const pD=now.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'});
+  const pT=p2(now.getHours())+':'+p2(now.getMinutes());
+  const csLabel=csFilter==='all'?'60+90 एकत्रित':`${csFilter} दिवस`;
+  const offLabel=offFilter?` | अधिकारी: ${offFilter}`:'';
+  const filterLabel=csLabel+offLabel;
+  let ov=0,cr=0,sa=0;
+  const rows=act.map((c,i)=>{
+    const rem=dLeft(c.date,c.csType),st=getSt(rem);
+    if(st.c==='overdue'||st.c==='critical')ov++;else if(st.c==='warning'||st.c==='caution')cr++;else sa++;
+    const rt=rem<0?`⛔ ${Math.abs(rem)} दि.उलटली`:`${rem} दि.`;
+    const rs=rem<0?'background:#fff0f0;':rem<=10?'background:#fffaf0;':'';
+    const tc=rem<0?'#cc0000':rem<=10?'#cc6600':'#006600';
+    return `<tr style="${rs}"><td style="text-align:center;">${i+1}</td><td style="font-weight:700;">${c.grno}</td><td>${c.section}</td><td>${fD(c.date)}</td><td style="text-align:center;font-weight:700;">${c.csType}</td><td>${c.officer}</td><td>${dlStr(c.date,c.csType)}</td><td style="color:${tc};font-weight:700;text-align:center;">${rt}</td><td style="font-size:9px;color:${c.pendingReason?'#cc0000':'#999'};">${c.pendingReason||'—'}</td></tr>`;
+  }).join('');
+  const w=window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html lang="mr"><head><meta charset="UTF-8"><title>CS अहवाल</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Noto Sans Devanagari',Arial,sans-serif;font-size:10px;padding:12px;color:#111;}
+.hdr{border-bottom:3px double #1a3a6b;padding-bottom:8px;margin-bottom:10px;text-align:center;}
+.hdr h1{font-size:15px;font-weight:700;color:#1a3a6b;}.hdr h2{font-size:12px;color:#333;}.hdr p{font-size:10px;color:#555;}
+.info{display:flex;justify-content:space-between;background:#f0f4ff;border:1px solid #c0ccee;padding:4px 10px;border-radius:3px;margin-bottom:8px;font-size:9.5px;}
+.summ{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px;}
+.sb{border:1px solid #ccc;border-radius:3px;padding:5px;text-align:center;}.sb .n{font-size:15px;font-weight:700;}.sb .l{font-size:8px;color:#666;}
+.sb.r{border-color:#cc0000;background:#fff5f5;}.sb.r .n{color:#cc0000;}.sb.o .n{color:#cc6600;}.sb.g .n{color:#006600;}.sb.b .n{color:#1a3a6b;}
+table{width:100%;border-collapse:collapse;font-size:9.5px;}thead tr{background:#1a3a6b;color:#fff;}
+th,td{padding:3px 5px;border:1px solid #ccc;vertical-align:middle;}
+tr:nth-child(even):not([style]){background:#f9f9ff;}
+.sig{margin-top:14px;display:flex;justify-content:flex-end;}
+.sigr{text-align:center;}.sl{border-top:1px solid #333;width:180px;padding-top:3px;font-size:10.5px;font-weight:700;}.sd{font-size:10px;color:#444;}
+@media print{@page{size:A4 landscape;margin:8mm;}}</style></head><body>
+<div class="hdr"><h1>${CFG.psn}</h1><h2>CS Tracker Pro | मुदत अहवाल</h2><p>फिल्टर: ${filterLabel} | दिनांक: ${pD} ${pT}</p></div>
+<div class="info"><span><strong>पो.स्टे.:</strong> ${CFG.psn}</span><span><strong>फिल्टर:</strong> ${filterLabel}</span><span><strong>एकूण:</strong> ${act.length}</span></div>
+<div class="summ">
+<div class="sb r"><div class="n">${ov}</div><div class="l">तातडी/मुदत संपली</div></div>
+<div class="sb o"><div class="n">${cr}</div><div class="l">इशारा/सावध</div></div>
+<div class="sb g"><div class="n">${sa}</div><div class="l">सुरक्षित</div></div>
+<div class="sb b"><div class="n">${act.length}</div><div class="l">एकूण</div></div></div>
+<table><thead><tr><th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th><th>C/S</th><th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस/स्थिती</th><th>प्रलंबित कारण</th></tr></thead>
+<tbody>${rows||'<tr><td colspan="9" style="text-align:center;color:#999;padding:10px;">कोणतीही प्रकरणे नाहीत</td></tr>'}</tbody></table>
+<div class="sig"><div class="sigr"><div class="sl">${CFG.sho||'SHO'}</div><div class="sd">Sr. पोलीस निरीक्षक</div><div class="sd">${CFG.psn}</div></div></div>
+<script>window.onload=()=>window.print();<\/script></body></html>`);
+  w.document.close();
+}
+
+// ══════════ EXCEL EXPORT ══════════
+function doExcel(){
+  const offFilter=document.getElementById('allOfficerFilter')?.value||'';
+  const qFilter=(document.getElementById('allSearchQ')?.value||'').toLowerCase();
+  let act=S.cases.map((c,i)=>({...c,i})).filter(c=>!c.filed);
+  if(csFilter!=='all') act=act.filter(c=>c.csType===csFilter);
+  if(offFilter) act=act.filter(c=>c.officer===offFilter);
+  if(qFilter) act=act.filter(c=>(c.grno+' '+c.section+' '+c.officer).toLowerCase().includes(qFilter));
+  act=act.sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+  if(!act.length){alert('Excel साठी कोणतीही प्रकरणे नाहीत.');return;}
+  const now=new Date();
+  const esc=s=>`"${(s||'').toString().replace(/"/g,'""')}"`;
+  let csv='\uFEFF';
+  csv+=`पोलीस स्टेशन:,${CFG.psn}\n`;
+  csv+=`दिनांक:,${now.toLocaleDateString('en-IN')}\n`;
+  csv+=`फिल्टर:,${csFilter==='all'?'सर्व':csFilter+' दिवस'}${offFilter?' | '+offFilter:''}\n`;
+  csv+=`एकूण:,${act.length}\n\n`;
+  csv+=`अ.क्र.,गु.र.क्र.,कलम,दाखल दिनांक,C/S,तपासी अधिकारी,अंतिम मुदत,दिवस शिल्लक,स्थिती,प्रलंबित कारण\n`;
+  act.forEach((c,i)=>{
+    const rem=dLeft(c.date,c.csType),st=getSt(rem);
+    csv+=`${i+1},${esc(c.grno)},${esc(c.section)},${esc(fD(c.date))},${c.csType} दिवस,${esc(c.officer)},${esc(dlStr(c.date,c.csType))},${rem},${esc(st.l)},${esc(c.pendingReason||'')}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`CS_${CFG.psn}_${csFilter==='all'?'सर्व':csFilter+'दिवस'}_${now.toISOString().slice(0,10)}.csv`;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ══════════ PRINT ══════════
+function doPrint(csType){
+  const now=new Date(),pD=now.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}),pT=p2(now.getHours())+':'+p2(now.getMinutes());
+  const w=window.open('','_blank');
+
+  // ── एकत्रित print — दोन column ──
+  if(!csType){
+    const offFilter=document.getElementById('allOfficerFilter')?.value||'';
+    const qFilter=(document.getElementById('allSearchQ')?.value||'').toLowerCase();
+
+    let allActive=S.cases.filter(c=>!c.filed);
+    if(offFilter) allActive=allActive.filter(c=>c.officer===offFilter);
+    if(qFilter) allActive=allActive.filter(c=>(c.grno+' '+c.section+' '+c.officer).toLowerCase().includes(qFilter));
+
+    const c60=allActive.filter(c=>c.csType===60).sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+    const c90=allActive.filter(c=>c.csType===90).sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+    const filterLabel=offFilter?` | अधिकारी: ${offFilter}`:(qFilter?` | शोध: "${qFilter}"`:'');
+
+
+    function mkStats(arr,cs){
+      let ov=0,cr=0,wa=0,sa=0;
+      arr.forEach(c=>{const s=getSt(dLeft(c.date,c.csType)).c;if(s==='overdue')ov++;else if(s==='critical')cr++;else if(s==='warning')wa++;else sa++;});
+      const col=cs===60?'#7b5800':'#0d3060';
+      return `<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:6px;">
+        <div class="sb ov"><div class="n">${ov}</div><div class="l">संपली</div></div>
+        <div class="sb cr"><div class="n">${cr}</div><div class="l">तातडी</div></div>
+        <div class="sb wa"><div class="n">${wa}</div><div class="l">इशारा</div></div>
+        <div class="sb sa"><div class="n">${sa}</div><div class="l">सुरक्षित</div></div>
+        <div class="sb fl"><div class="n">${arr.length}</div><div class="l">एकूण</div></div>
+      </div>`;
+    }
+
+    function mkRows(arr){
+      if(!arr.length) return `<tr><td colspan="7" style="text-align:center;color:#999;padding:10px;">कोणतीही प्रकरणे नाहीत</td></tr>`;
+      return arr.map((c,i)=>{
+        const rem=dLeft(c.date,c.csType),st=getSt(rem);
+        const rt=rem<0?`⛔ ${Math.abs(rem)} दि.उलटली`:`${rem} दि.`;
+        const rs=rem<0?'background:#fff0f0;':rem<=15?'background:#fffaf0;':'';
+        const tc=rem<0?'#cc0000':rem<=15?'#cc6600':'#006600';
+        return `<tr style="${rs}">
+          <td style="text-align:center;">${i+1}</td>
+          <td style="font-weight:700;">${c.grno}</td>
+          <td>${c.section}</td>
+          <td>${fD(c.date)}</td>
+          <td>${c.officer}</td>
+          <td>${dlStr(c.date,c.csType)}</td>
+          <td style="color:${tc};font-weight:700;text-align:center;">${rt}</td>
+        </tr>
+        ${(c.pendingReason||c.acpRemark)?`<tr style="${rs}background:inherit;"><td></td><td colspan="6" style="font-size:9px;color:#666;padding-bottom:3px;">${c.pendingReason?`📌 ${c.pendingReason}`:''} ${c.acpRemark?`| ACP: ${c.acpRemark}`:''}</td></tr>`:''}`;
+      }).join('');
+    }
+
+    w.document.write(`<!DOCTYPE html><html lang="mr"><head><meta charset="UTF-8"><title>CS अहवाल — एकत्रित</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans Devanagari',Arial,sans-serif;font-size:9.5px;padding:10px 14px;background:#fff;color:#111;}
+.lh{border-bottom:3px double #1a3a6b;padding-bottom:7px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.lhc{flex:1;text-align:center;}
+.lht{font-size:13px;font-weight:700;color:#1a3a6b;}
+.lhs{font-size:11px;font-weight:600;color:#333;}
+.lhsm{font-size:10px;color:#666;}
+.lhr{text-align:right;font-size:9.5px;color:#555;line-height:1.8;}
+.pbar{display:flex;justify-content:space-between;background:#f0f4ff;border:1px solid #c0ccee;padding:4px 10px;border-radius:3px;margin-bottom:8px;font-size:9.5px;flex-wrap:wrap;gap:3px;}
+/* TWO COLUMN */
+.col-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.col-box{border:2px solid #ccc;border-radius:4px;overflow:hidden;}
+.col-hdr{padding:5px 10px;font-size:11px;font-weight:700;display:flex;justify-content:space-between;align-items:center;}
+.col-hdr.c60{background:#7b5800;color:#fff;}
+.col-hdr.c90{background:#0d3060;color:#fff;}
+.col-body{padding:6px;}
+.sb{border:1px solid #ccc;border-radius:3px;padding:3px;text-align:center;}
+.sb .n{font-size:13px;font-weight:700;line-height:1.1;}.sb .l{font-size:8px;color:#666;}
+.sb.ov{border-color:#cc0000;background:#fff5f5;}.sb.ov .n{color:#cc0000;}
+.sb.cr .n{color:#ff4444;}.sb.wa .n{color:#cc6600;}.sb.sa .n{color:#006600;}.sb.fl .n{color:#1a3a6b;}
+table{width:100%;border-collapse:collapse;font-size:8.5px;}
+thead tr.h60{background:#7b5800;color:#fff;}
+thead tr.h90{background:#0d3060;color:#fff;}
+th{padding:3px 4px;text-align:center;border:1px solid rgba(0,0,0,0.2);font-size:8px;}
+td{padding:2.5px 4px;border:1px solid #d0d0d0;vertical-align:middle;}
+tr:nth-child(even):not([style]){background:#f9f9ff;}
+.sig{margin-top:12px;display:flex;justify-content:flex-end;}
+.sigr{text-align:center;}
+.sl{border-top:1px solid #333;width:180px;padding-top:3px;font-size:10px;font-weight:700;}
+.sd{font-size:9.5px;color:#444;}
+.foot{margin-top:6px;border-top:1px solid #ccc;padding-top:3px;font-size:8.5px;color:#999;text-align:center;}
+@media print{body{padding:6px 10px;}@page{size:A4 landscape;margin:8mm;}}
+</style></head><body>
+
+<div class="lh">
+  <div class="lhc">
+    <div class="lht">${CFG.psn}</div>
+    ${CFG.sho?`<div class="lhsm">Sr.PI: ${CFG.sho}</div>`:''}
+    ${offFilter?`<div class="lhsm" style="color:#7b5800;">अधिकारी: ${offFilter}</div>`:''}
+  </div>
+  <div class="lhr"><strong>दिनांक</strong><br>${pD}<br><strong>वेळ</strong><br>${pT}</div>
+</div>
+
+<div class="pbar">
+  <span><strong>पो.स्टे.:</strong> ${CFG.psn}</span>
+  <span>CS Tracker Pro — एकत्रित अहवाल (60 + 90 दिवस)${filterLabel}</span>
+  <span>60 दिवस: <strong>${c60.length}</strong> | 90 दिवस: <strong>${c90.length}</strong> | एकूण: <strong>${c60.length+c90.length}</strong></span>
+  <span>मुद्रण: ${pD} ${pT}</span>
+</div>
+
+<div class="col-wrap">
+
+  <!-- ── 60 दिवस column ── -->
+  <div class="col-box" style="border-color:#7b5800;">
+    <div class="col-hdr c60">
+      <span>🕐 60 दिवस प्रकरणे</span>
+      <span style="font-size:10px;font-weight:400;">शिक्षा < ७ वर्षे | 60 दिवस</span>
+    </div>
+    <div class="col-body">
+      ${mkStats(c60,60)}
+      <table>
+        <thead><tr class="h60">
+          <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th><th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस</th>
+        </tr></thead>
+        <tbody>${mkRows(c60)}</tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── 90 दिवस column ── -->
+  <div class="col-box" style="border-color:#0d3060;">
+    <div class="col-hdr c90">
+      <span>🕐 90 दिवस प्रकरणे</span>
+      <span style="font-size:10px;font-weight:400;">शिक्षा ≥ ७ वर्षे | 90 दिवस</span>
+    </div>
+    <div class="col-body">
+      ${mkStats(c90,90)}
+      <table>
+        <thead><tr class="h90">
+          <th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th><th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस</th>
+        </tr></thead>
+        <tbody>${mkRows(c90)}</tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div class="sig"><div class="sigr"><div class="sl">${CFG.sho||'SHO'}</div><div class="sd">Sr. पोलीस निरीक्षक</div><div class="sd">${CFG.psn}</div></div></div>
+<div class="foot">CS Tracker Pro | एकत्रित अहवाल (60+90) | ${pD} ${pT}</div>
+<script>window.onload=()=>window.print();<\/script>
+</body></html>`);
+    w.document.close();
+    return;
+  }
+
+  // ── वेगळा 60 किंवा 90 print ──
+  const act=S.cases.filter(c=>!c.filed&&c.csType===csType).sort((a,b)=>dLeft(a.date,a.csType)-dLeft(b.date,b.csType));
+  const label=`${csType} दिवस`;
+  const hdrColor=csType===60?'#7b5800':'#0d3060';
+  let ov=0,cr=0,wa=0,sa=0;
+  const rows=act.map((c,i)=>{
+    const rem=dLeft(c.date,c.csType),st=getSt(rem);
+    if(st.c==='overdue')ov++;else if(st.c==='critical')cr++;else if(st.c==='warning')wa++;else sa++;
+    const rt=rem<0?`मुदत ${Math.abs(rem)} दि. उलटली`:`${rem} दिवस`;
+    const rs=rem<0?'background:#fff0f0;':rem<=15?'background:#fffaf0;':'';
+    const tc=rem<0?'#cc0000':rem<=15?'#cc6600':'#006600';
+    return `<tr style="${rs}"><td>${i+1}</td><td style="font-weight:700;">${c.grno}</td><td>${c.section}</td><td>${fD(c.date)}</td><td>${c.officer}</td><td>${dlStr(c.date,c.csType)}</td><td style="color:${tc};font-weight:700;">${rt}</td><td style="color:${c.pendingReason?'#cc0000':'#999'};">${c.pendingReason||'—'}</td><td>${c.acpRemark||'—'}</td></tr>`;
+  }).join('');
+  w.document.write(`<!DOCTYPE html><html lang="mr"><head><meta charset="UTF-8"><title>CS अहवाल — ${label}</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
+body{font-family:'Noto Sans Devanagari',Arial,sans-serif;font-size:11px;padding:14px 20px;}
+.lh{border-bottom:3px double ${hdrColor};padding-bottom:8px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.lhc{flex:1;text-align:center;font-size:13px;font-weight:700;color:${hdrColor};}
+.lhsub{font-size:11px;color:#333;font-weight:600;}.lhsmall{font-size:10px;color:#666;}
+.lhr{text-align:right;font-size:10px;color:#555;line-height:1.9;}
+.pbar{display:flex;justify-content:space-between;background:#f0f4ff;border:1px solid #c0ccee;padding:5px 12px;border-radius:3px;margin-bottom:8px;font-size:10.5px;flex-wrap:wrap;gap:4px;}
+.typ{display:inline-block;background:${csType===60?'#fff8e6':'#e6f0ff'};border:1px solid ${csType===60?'#f0a500':'#3b9eff'};color:${hdrColor};padding:3px 12px;border-radius:4px;font-weight:700;font-size:11px;}
+.summ{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:8px;}
+.sb{border:1px solid #ccc;border-radius:3px;padding:5px;text-align:center;}
+.sb .n{font-size:15px;font-weight:700;line-height:1.1;}.sb .l{font-size:9px;color:#666;}
+.sb.ov{border-color:#cc0000;background:#fff5f5;}.sb.ov .n{color:#cc0000;}
+.sb.cr .n{color:#ff4444;}.sb.wa .n{color:#cc6600;}.sb.sa .n{color:#006600;}.sb.fl .n{color:#1a3a6b;}
+table{width:100%;border-collapse:collapse;font-size:10px;}
+thead tr{background:${hdrColor};color:#fff;}th{padding:5px;text-align:center;border:1px solid rgba(0,0,0,.2);}
+td{padding:4px 5px;border:1px solid #bbb;vertical-align:middle;}
+tr:nth-child(even):not([style]){background:#f7f9ff;}
+.sig{margin-top:18px;display:flex;justify-content:flex-end;}
+.sigr{text-align:center;}.sl{border-top:1px solid #333;width:180px;padding-top:3px;font-size:10.5px;font-weight:700;}.sd{font-size:10px;color:#444;}
+.foot{margin-top:8px;border-top:1px solid #ccc;padding-top:4px;font-size:9px;color:#999;text-align:center;}
+@media print{body{padding:8px 12px;}}
+</style></head><body>
+<div class="lh">
+<div style="flex:1;text-align:center;"><div class="lhc">${CFG.psn}</div><div class="lhsub">C/S प्रकार: <span style="color:${hdrColor};">${label}</span></div>${CFG.sho?`<div class="lhsmall">Sr.PI: ${CFG.sho}</div>`:''}</div>
+<div class="lhr"><strong>दिनांक</strong><br>${pD}<br><strong>वेळ</strong><br>${pT}</div></div>
+<div class="pbar"><span><strong>पो.स्टे.:</strong> ${CFG.psn}</span><span>C/S : <span class="typ">${label}</span></span><span><strong>एकूण:</strong> ${act.length}</span><span>मुद्रण: ${pD} ${pT}</span></div>
+<div class="summ">
+<div class="sb ov"><div class="n">${ov}</div><div class="l">मुदत संपली</div></div>
+<div class="sb cr"><div class="n">${cr}</div><div class="l">तातडी</div></div>
+<div class="sb wa"><div class="n">${wa}</div><div class="l">इशारा</div></div>
+<div class="sb sa"><div class="n">${sa}</div><div class="l">सुरक्षित</div></div>
+<div class="sb fl"><div class="n">${act.length}</div><div class="l">एकूण</div></div>
+</div>
+<table><thead><tr><th>#</th><th>गु.र.क्र.</th><th>कलम</th><th>दाखल दिनांक</th><th>तपासी अधिकारी</th><th>अंतिम मुदत</th><th>दिवस / स्थिती</th><th>प्रलंबित कारण</th><th>ACP निर्देश</th></tr></thead>
+<tbody>${rows||`<tr><td colspan="9" style="text-align:center;color:#999;">कोणतीही ${label} प्रकरणे नाहीत</td></tr>`}</tbody></table>
+<div class="sig"><div class="sigr"><div class="sl">${CFG.sho||'SHO'}</div><div class="sd">Sr. पोलीस निरीक्षक</div><div class="sd">${CFG.psn}</div></div></div>
+<div class="foot">CS Tracker Pro | ${label} अहवाल | ${pD} ${pT}</div>
+<script>window.onload=()=>window.print();<\/script></body></html>`);
+  w.document.close();
+}
+
+// ══════════ LOAD ══════════
+function showLoad(t){document.getElementById('loader').style.display='flex';document.getElementById('lt').textContent=t||'';}
+function hideLoad(){document.getElementById('loader').style.display='none';}
+
+// ══════════ LICENSE SYSTEM ══════════
+const LIC_CFG_KEY = 'bnss_lic_v1';
+const LIC_DB_KEY  = 'bnss_licdata_v1';
+
+// Device ID — browser fingerprint (stable for same browser+device)
+function getDeviceId(){
+  let did = localStorage.getItem('bnss_device_id');
+  if(!did){
+    const nav = navigator.userAgent + navigator.language + screen.width + screen.height + screen.colorDepth;
+    let hash = 0;
+    for(let i=0;i<nav.length;i++){ hash=((hash<<5)-hash)+nav.charCodeAt(i); hash|=0; }
+    did = Math.abs(hash).toString(36).toUpperCase().slice(0,8).padEnd(8,'0');
+    localStorage.setItem('bnss_device_id', did);
+  }
+  return did;
+}
+
+// Key validation algorithm (must match Admin Panel)
+function validateKey(key, deviceId, secret){
+  // Key format: DDDD-MMDDXX-XXXX-YYYY
+  const parts = key.replace(/\s/g,'').split('-');
+  if(parts.length !== 4) return null;
+
+  // Try all possible dates in next 2 years to find matching date
+  const now = new Date();
+  for(let d=0; d<=730; d++){
+    const testDate = new Date(now);
+    testDate.setDate(testDate.getDate() + d);
+    const dateStr = testDate.toISOString().slice(0,10).replace(/-/g,'');
+
+    const combined = deviceId + dateStr + secret;
+    let hash = 0;
+    for(let i=0;i<combined.length;i++){ hash=((hash<<5)-hash)+combined.charCodeAt(i); hash|=0; }
+    const absHash = Math.abs(hash);
+    const h = absHash.toString().padStart(8,'0').slice(-8); // फक्त 0-9 अंक
+
+    const prefix = deviceId.slice(0,4).toUpperCase().replace(/[^A-Z0-9]/g,'X').padEnd(4,'X');
+    const dc = dateStr.slice(4,8);
+    const yr = (parseInt(dateStr.slice(0,4))%9000+1000).toString();
+    const expectedKey = `${prefix}-${dc}${h.slice(0,2)}-${h.slice(2,6)}-${yr}`;
+
+    if(expectedKey === key.toUpperCase()){
+      return { validUntil: testDate, daysLeft: d };
+    }
+  }
+  return null;
+}
+
+function getLicSecret(){
+  // Secret stored in license data
+  try{
+    const d = JSON.parse(localStorage.getItem(LIC_DB_KEY));
+    return d && d.secret ? d.secret : null;
+  }catch(e){ return null; }
+}
+
+function formatKeyInput(inp){
+  let v = inp.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+  let out = '';
+  for(let i=0;i<v.length&&i<16;i++){
+    if(i>0&&i%4===0) out+='-';
+    out+=v[i];
+  }
+  inp.value = out;
+}
+
+function copyDeviceId(elId){
+  const txt = document.getElementById(elId).textContent;
+  if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(()=>alert('Device ID Copy झाली!')); }
+  else{ const el=document.createElement('textarea');el.value=txt;document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);alert('Device ID Copy झाली!'); }
+}
+
+// ── LICENSE CHECK ──
+function checkLicense(){
+  const deviceId = getDeviceId();
+  const licData  = JSON.parse(localStorage.getItem(LIC_DB_KEY) || 'null');
+
+  // Show license screen
+  document.getElementById('licenseScreen').style.display = 'flex';
+  document.getElementById('newDevId').textContent = deviceId;
+  document.getElementById('expDevId').textContent = deviceId;
+  document.getElementById('blockDevId').textContent = deviceId;
+
+  if(!licData || !licData.key){
+    // No license — show new activation screen
+    document.getElementById('licNew').style.display = 'block';
+    document.getElementById('licExpired').style.display = 'none';
+    document.getElementById('licBlocked').style.display = 'none';
+
+    // Check Firebase for this device's license (if admin blocked remotely)
+    checkFirebaseLicense(deviceId, null);
+    return;
+  }
+
+  // Verify stored key
+  const result = validateKey(licData.key, deviceId, licData.secret);
+  if(!result){
+    // Invalid key
+    document.getElementById('licNew').style.display = 'block';
+    document.getElementById('licExpired').style.display = 'none';
+    document.getElementById('licBlocked').style.display = 'none';
+    return;
+  }
+
+  const now = new Date();
+  const expiry = new Date(licData.validUntil);
+
+  if(expiry < now){
+    // Expired
+    document.getElementById('licNew').style.display = 'none';
+    document.getElementById('licExpired').style.display = 'block';
+    document.getElementById('licBlocked').style.display = 'none';
+    return;
+  }
+
+  // Seems valid — check Firebase for block status
+  checkFirebaseLicense(deviceId, licData);
+}
+
+async function checkFirebaseLicense(deviceId, localLicData){
+  // Try to initialize Firebase for license check
+  // Use license's own firebase config or try to use PS config
+  const psCfg = lCfg();
+  if(!psCfg){ 
+    // No PS config yet — if local license is valid, proceed
+    if(localLicData){ proceedWithLicense(localLicData); }
+    return;
+  }
+
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({apiKey:psCfg.ak, authDomain:`${psCfg.pid}.firebaseapp.com`, projectId:psCfg.pid});
+    }
+    const tempDb = firebase.firestore();
+
+    // Find this device's license in Firebase
+    const snap = await tempDb.collection('bnss_licenses').where('deviceId','==',deviceId).get();
+
+    if(snap.empty){
+      // Not in Firebase — if local valid, proceed (offline grace)
+      if(localLicData){ proceedWithLicense(localLicData); }
+      return;
+    }
+
+    let licDoc = null;
+    snap.forEach(d=>{ licDoc = {id:d.id,...d.data()}; });
+
+    // Update last login
+    try{ tempDb.collection('bnss_licenses').doc(licDoc.id).update({lastLogin: new Date().toISOString()}); }catch(e){}
+
+    if(licDoc.blocked){
+      // BLOCKED by admin
+      document.getElementById('licNew').style.display = 'none';
+      document.getElementById('licExpired').style.display = 'none';
+      document.getElementById('licBlocked').style.display = 'block';
+      return;
+    }
+
+    const fbExpiry = new Date(licDoc.validUntil);
+    if(fbExpiry < new Date()){
+      // Expired in Firebase
+      document.getElementById('licNew').style.display = 'none';
+      document.getElementById('licExpired').style.display = 'block';
+      document.getElementById('licBlocked').style.display = 'none';
+      return;
+    }
+
+    // All good — proceed
+    proceedWithLicense(localLicData || {key: licDoc.key, validUntil: licDoc.validUntil, secret: localLicData?.secret});
+
+  }catch(e){
+    // Firebase check failed (offline) — use local license
+    console.warn('License Firebase check failed (offline):', e);
+    if(localLicData){ proceedWithLicense(localLicData); }
+  }
+}
+
+function proceedWithLicense(licData){
+  // License valid — hide license screen
+  document.getElementById('licenseScreen').style.display = 'none';
+
+  // Show trial/active badge in header (set after launch)
+  const now = new Date();
+  const expiry = new Date(licData.validUntil);
+  const daysLeft = Math.ceil((expiry-now)/86400000);
+  window._licDaysLeft = daysLeft;
+  window._licType = licData.type || 'paid';
+
+  // Now do normal PS init
+  const cfg = lCfg();
+  if(!cfg){
+    // No PS config yet — show setup screen
+    document.getElementById('setupScreen').style.display='flex';
+    return;
+  }
+  CFG = cfg;
+  try{
+    try{ firebase.initializeApp({apiKey:CFG.ak,authDomain:`${CFG.pid}.firebaseapp.com`,projectId:CFG.pid}); }catch(e){}
+    db = firebase.firestore();
+    lData();
+    launch();
+  }catch(err){
+    console.error('Launch error:',err);
+    localStorage.removeItem('ps_cfg_v3');
+    location.reload();
+  }
+}
+
+// ── ACTIVATE LICENSE ──
+async function activateLicense(){
+  const keyEl = document.getElementById('licKey') || document.getElementById('renewKey');
+  const errEl = document.getElementById('licErr') || document.getElementById('renewErr');
+  const key = (keyEl.value||'').trim().toUpperCase();
+
+  if(!key || key.length < 19){ errEl.style.display='block'; errEl.textContent='Key नीट भरा (उदा: ABCD-1234-WXYZ-5678)'; return; }
+
+  errEl.style.display='none';
+
+  // Need secret — get from Firebase
+  const deviceId = getDeviceId();
+  const psCfg = lCfg();
+
+  if(!psCfg){
+    errEl.style.display='block';
+    errEl.textContent='⚠️ आधी Firebase Setup करा — खालील Setup screen वापरा.';
+    // Show setup screen
+    document.getElementById('licenseScreen').style.display='none';
+    return;
+  }
+
+  // Try to validate against Firebase
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({apiKey:psCfg.ak,authDomain:`${psCfg.pid}.firebaseapp.com`,projectId:psCfg.pid});
+    }
+    const tempDb = firebase.firestore();
+    const snap = await tempDb.collection('bnss_licenses').where('deviceId','==',deviceId).where('key','==',key).get();
+
+    if(snap.empty){
+      errEl.style.display='block';
+      errEl.textContent='❌ ही Key या Device साठी valid नाही. Device ID बरोबर पाठवली होती का?';
+      return;
+    }
+
+    let licDoc = null;
+    snap.forEach(d=>{ licDoc={id:d.id,...d.data()}; });
+
+    if(licDoc.blocked){
+      errEl.style.display='block';
+      errEl.textContent='⛔ हे device block केले आहे. संपर्क करा.';
+      return;
+    }
+
+    const expiry = new Date(licDoc.validUntil);
+    if(expiry < new Date()){
+      errEl.style.display='block';
+      errEl.textContent='❌ ही Key expire झाली आहे. नवीन Key साठी संपर्क करा.';
+      return;
+    }
+
+    // Valid! Save locally
+    const licData = {key, validUntil: licDoc.validUntil, type: licDoc.type, secret:'LOCAL_VALID'};
+    localStorage.setItem(LIC_DB_KEY, JSON.stringify(licData));
+
+    // Update last login
+    try{ tempDb.collection('bnss_licenses').doc(licDoc.id).update({lastLogin:new Date().toISOString(),activated:true}); }catch(e){}
+
+    alert(`✅ License Activate झाली!\n\nPS: ${licDoc.psName}\nValid Until: ${expiry.toLocaleDateString('en-IN')}\nType: ${licDoc.type === 'trial' ? 'Trial (मोफत)' : 'Paid'}`);
+    proceedWithLicense(licData);
+
+  }catch(e){
+    errEl.style.display='block';
+    errEl.textContent='❌ Firebase शी जोडता आले नाही. Internet आहे का? Error: '+e.message;
+  }
+}
+
+// ══════════ AUTO CONNECT ══════════
+window.onload=function(){
+  const cfg=lCfg();
+
+  // License check first
+  if(cfg){
+    // PS already configured — check license
+    checkLicense();
+    return;
+  }
+
+  // No PS config — check license first, then show setup
+  const licData = JSON.parse(localStorage.getItem(LIC_DB_KEY)||'null');
+  if(!licData){
+    // No license, no config — show license screen first
+    document.getElementById('licenseScreen').style.display='flex';
+    document.getElementById('licNew').style.display='block';
+    document.getElementById('newDevId').textContent=getDeviceId();
+    document.getElementById('expDevId').textContent=getDeviceId();
+    // After activation, proceedWithLicense will handle setup redirect
+    // Override proceedWithLicense for no-config case
+    window._noConfig = true;
+    return;
+  }
+
+  // Has license but no PS config — show setup
+  document.getElementById('licenseScreen').style.display='none';
+};
+</script>
+</body>
+</html>
